@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+
+  db:
+    image: mysql:5.7
+    volumes:
+      - "database:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: goscrum
+      MYSQL_USER: goscrum
+      MYSQL_PASSWORD: goscrum
+    ports:
+      - 3306:3306
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+volumes:
+  database:

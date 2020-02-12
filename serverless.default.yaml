@@ -1,0 +1,43 @@
+service: goscrum-server
+
+# Use the serverless-webpack plugin to transpile ES6
+plugins:
+  - serverless-plugin-tracing
+  - serverless-sam
+
+package:
+  exclude:
+    - ./**
+  include:
+    - ./bin/**
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: dev
+  region: ap-south-1
+  tracing: true
+  memorySize: 124 # optional, in MB, default is 1024
+  timeout: 30 # optional, in seconds, default is 6
+  environment:
+    DEBUG: true
+    DATABASE_NAME: ${env:DATABASE_NAME}
+    DATABASE_HOSTNAME: ${env:DATABASE_HOSTNAME}
+    DATABASE_USERNAME: ${env:DATABASE_USERNAME}
+    DATABASE_PASSWORD: ${env:DATABASE_PASSWORD}
+
+functions:
+  migrate:
+    handler: bin/migrate
+    events:
+      - http:
+          path: migrate
+          method: get
+
+  workspace:
+    handler: bin/workspace
+    events:
+      - http:
+          path: workspace
+          method: post
+

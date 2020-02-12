@@ -1,0 +1,24 @@
+type: object
+properties:
+  bot_user_id:
+    type: string
+  notifier_interval:
+    type: string
+  language:
+    type: string
+  max_reminders:
+    type: string
+  reminder_offset:
+    type: string
+  bot_access_token:
+    type: string
+  workspace_id:
+    type: string
+  workspace_name:
+    type: string
+  reporting_channel:
+    type: string
+  reporting_time:
+    type: string
+  projects_reports_enabled:
+    type: string

@@ -1,0 +1,11 @@
+{
+  "name": "goscrum-server",
+  "version": "1.0.0",
+  "repository": "git@gitlab.com:goscrum/server.git",
+  "author": "Durgaprasad Budhwani <durgaprasad.budhwani@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless-plugin-tracing": "^2.0.0",
+    "serverless-sam": "^0.2.0"
+  }
+}

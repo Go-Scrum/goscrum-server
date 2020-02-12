@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: GoScrum API
+  description: GoScrum API
+
+paths:
+  /workspace:
+    post:
+      summary: Create a workspace
+      description: |
+        Create a workspace
+      tags:
+        - workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/workspace'
+
+      responses:
+        200:
+          description: created workspace
+
+components:
+  schemas:
+    workspace:
+      $ref: './specs/workspace.schema.yaml'
+
