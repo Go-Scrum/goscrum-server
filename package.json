@@ -5,7 +5,7 @@
   "author": "Durgaprasad Budhwani <durgaprasad.budhwani@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "serverless-plugin-tracing": "^2.0.0",
-    "serverless-sam": "^0.2.0"
+    "serverless-offline": "^5.12.1",
+    "serverless-plugin-tracing": "^2.0.0"
   }
 }

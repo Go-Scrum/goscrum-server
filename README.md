@@ -9,18 +9,13 @@
 npm install -g serverless
 ```
 
-- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html)
-
-```bash
-brew tap aws/tap
-brew install aws-sam-cli
-```
-
 - [Docker](https://www.docker.com/products/docker-desktop)
 
 ## Run Application
 
 ```bash
+
+yarn install
 
 export DATABASE_NAME='goscrum'
 export DATABASE_HOSTNAME='192.168.31.56' ## IP address of your machine

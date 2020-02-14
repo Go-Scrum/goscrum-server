@@ -3,7 +3,7 @@ service: goscrum-server
 # Use the serverless-webpack plugin to transpile ES6
 plugins:
   - serverless-plugin-tracing
-  - serverless-sam
+  - serverless-offline
 
 package:
   exclude:
@@ -31,7 +31,7 @@ functions:
     handler: bin/migrate
     events:
       - http:
-          path: migrate
+          path: mirate
           method: get
 
   workspace:
@@ -41,3 +41,16 @@ functions:
           path: workspace
           method: post
 
+  oauth:
+    handler: bin/oauth
+    events:
+      - http:
+          path: oauth/mattermost/register
+          method: get
+      - http:
+          path: oauth/mattermost/callback
+          method: get
+          request:
+            parameters:
+              querystrings:
+                code: true
