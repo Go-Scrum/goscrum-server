@@ -31,7 +31,7 @@ functions:
     handler: bin/migrate
     events:
       - http:
-          path: mirate
+          path: migrate
           method: get
 
   workspace:
