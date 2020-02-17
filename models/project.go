@@ -11,5 +11,8 @@ type Project struct {
 	OnbordingMessage string         `db:"onbording_message" json:"onbording_message,omitempty"`
 	SubmissionDays   string         `db:"submission_days" json:"submission_days,omitempty"`
 	Participants     []*Participant `gorm:"many2many:project_participants;"`
+	ReportingChannel string         `db:"reporting_channel" json:"reporting_channel"`
+	ReportingTime    string         `db:"reporting_time" json:"reporting_time"`
+	IsActive         bool           `db:"is_active" json:"is_active"`
 	Questions        []*Question    `gorm:"many2many:project_questions;"`
 }

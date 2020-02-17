@@ -6,6 +6,7 @@ const (
 	DatabaseHostName = "DATABASE_HOSTNAME"
 	DBUsername       = "DATABASE_USERNAME"
 	DBPassword       = "DATABASE_PASSWORD"
+	ApiUrl           = "API_URL"
 
 	// Messages
 	BadRequest = "Input field is not valid"

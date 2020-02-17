@@ -22,6 +22,7 @@ func main() {
 	router := gateway.NewAPIRouter()
 
 	router.Post("/workspace", controller.Create)
+	router.Put("/workspace/{id}", controller.Update)
 
 	apiGateway := gateway.NewGateway()
 	apiGateway.StartAPI(router)
