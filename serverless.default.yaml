@@ -64,3 +64,22 @@ functions:
             parameters:
               querystrings:
                 code: true
+
+  mattermost:
+    handler: bin/mattermost
+    events:
+      - http:
+          path: mattermost/{workspaceId}/channels
+          method: get
+          request:
+            parameters:
+              pathParameters:
+                workspaceId: true
+
+      - http:
+          path: mattermost/{workspaceId}/teams
+          method: get
+          request:
+            parameters:
+              pathParameters:
+                workspaceId: true
