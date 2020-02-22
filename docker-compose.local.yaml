@@ -12,7 +12,7 @@ services:
       MYSQL_USER: goscrum
       MYSQL_PASSWORD: goscrum
     ports:
-      - 3306:3306
+      - 3307:3306
 
 #  adminer:
 #    image: adminer
