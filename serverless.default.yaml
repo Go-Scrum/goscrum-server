@@ -30,6 +30,7 @@ provider:
     DATABASE_HOSTNAME: ${env:DATABASE_HOSTNAME}
     DATABASE_USERNAME: ${env:DATABASE_USERNAME}
     DATABASE_PASSWORD: ${env:DATABASE_PASSWORD}
+    DATABASE_PORT: ${env:DATABASE_PORT}
     API_URL: ${file(./serverless.${self:custom.stage}.yaml):API_URL}
 
 functions:
@@ -46,6 +47,16 @@ functions:
       - http:
           path: workspace
           method: post
+
+  project:
+    handler: bin/project
+    events:
+      - http:
+          path: projects
+          method: post
+      - http:
+          path: projects
+          method: get
 
   oauth:
     handler: bin/oauth

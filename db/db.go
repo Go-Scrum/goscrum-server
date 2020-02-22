@@ -11,10 +11,11 @@ import (
 )
 
 func DbClient(logEnabled bool) *gorm.DB {
-	connectionString := fmt.Sprintf(`%s:%s@tcp(%s:3306)/%s?charset=utf8&parseTime=True`,
+	connectionString := fmt.Sprintf(`%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True`,
 		os.Getenv(constants.DBUsername),
 		os.Getenv(constants.DBPassword),
 		os.Getenv(constants.DatabaseHostName),
+		os.Getenv(constants.DatabasePort),
 		os.Getenv(constants.DatabaseName))
 
 	fmt.Println(connectionString)
