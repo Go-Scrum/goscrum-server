@@ -91,6 +91,20 @@ func (service *WorkspaceService) GetWorkspace(id string) (models.Workspace, erro
 	return workspace, nil
 }
 
+//GetWorkspace returns a particular bot
+func (service *WorkspaceService) GetWorkspaceByToken(token string) (models.Workspace, error) {
+	workspace := models.Workspace{}
+	err := service.db.
+		Where("personal_token = ?", token).
+		First(&workspace).Error
+
+	if err != nil {
+		return workspace, err
+	}
+
+	return workspace, nil
+}
+
 //DeleteWorkspaceByID deletes bot
 func (service *WorkspaceService) DeleteWorkspaceByID(id string) error {
 	existingWorkspace := &models.Workspace{}

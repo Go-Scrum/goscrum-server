@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"goscrum/server/constants"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"goscrum/server/util"
 
 	"github.com/aws/aws-lambda-go/events"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/oauth2"
 )
 
@@ -81,7 +83,6 @@ func (a *AuthController) MattermostOauth(request events.APIGatewayProxyRequest) 
 	if err != nil {
 		return util.ServerError(err)
 	}
-
 	workspace, err := a.workspaceService.GetWorkspace(workspaceId)
 	if err != nil {
 		return util.ServerError(err)
@@ -98,6 +99,9 @@ func (a *AuthController) MattermostOauth(request events.APIGatewayProxyRequest) 
 	workspace.AccessToken = tok.AccessToken
 	workspace.RefreshToken = tok.RefreshToken
 	workspace.Expiry = &tok.Expiry
+	if workspace.PersonalToken == "" {
+		workspace.PersonalToken = base64.StdEncoding.EncodeToString(uuid.NewV4().Bytes())
+	}
 
 	err = a.workspaceService.Update(workspaceId, workspace)
 	// TODO for now, show error message, later redirect to beautiful page.

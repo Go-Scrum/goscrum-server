@@ -18,7 +18,7 @@ npm install -g serverless
 yarn install
 
 export DATABASE_NAME='goscrum'
-export DATABASE_HOSTNAME='192.168.31.57' ## IP address of your machine
+export DATABASE_HOSTNAME='192.168.14.181' ## IP address of your machine
 export DATABASE_USERNAME='goscrum'
 export DATABASE_PASSWORD='goscrum'
 

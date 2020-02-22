@@ -13,6 +13,7 @@ const (
 // Workspace is used for updating and storing different bot configuration parameters
 type Workspace struct {
 	Model
+	BotUserID     string        `db:"bot_user_id" json:"bot_user_id"`
 	Language      string        `db:"language" json:"language"`
 	WorkspaceName string        `db:"workspace_name" json:"workspace_name" `
 	URL           string        `json:"url"`
@@ -22,5 +23,6 @@ type Workspace struct {
 	AccessToken   string        `json:"access_token"`
 	RefreshToken  string        `json:"refresh_token"`
 	Expiry        *time.Time    `json:"expiry,omitempty"`
+	PersonalToken string        `json:"personal_token,omitempty"`
 	Projects      []*Project
 }

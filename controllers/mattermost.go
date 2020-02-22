@@ -10,10 +10,10 @@ import (
 )
 
 type MattermostController struct {
-	service services.MattermostService
+	service services.BotService
 }
 
-func NewMattermostController(service services.MattermostService) MattermostController {
+func NewMattermostController(service services.BotService) MattermostController {
 	return MattermostController{service: service}
 }
 

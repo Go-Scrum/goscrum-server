@@ -13,13 +13,14 @@ func main() {
 	defer db.Close()
 
 	workspaceService := services.NewWorkspaceService(db)
-	service := services.NewMattermostService(workspaceService)
+	service := services.NewBotService(workspaceService)
 
 	controller := controllers.NewMattermostController(service)
 	router := gateway.NewAPIRouter()
 
 	router.Get("/mattermost/{workspaceId}/channels", controller.GetChannels)
 	router.Get("/mattermost/{workspaceId}/teams", controller.GetTeams)
+	router.Get("/mattermost/project", controller.GetTeams)
 
 	apiGateway := gateway.NewGateway()
 	apiGateway.StartAPI(router)

@@ -92,3 +92,4 @@ serverless.yml
 /credentials
 !/vendor/vendor.json
 /vendor/
+!/handlers/bot.go
