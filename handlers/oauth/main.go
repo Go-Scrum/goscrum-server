@@ -18,11 +18,11 @@ func main() {
 
 	service := services.NewWorkspaceService(db)
 
-	controller := controllers.NewWorkspaceController(service)
+	controller := controllers.NewAuthController(service)
 	router := gateway.NewAPIRouter()
 
-	router.Post("/workspace", controller.Create)
-	router.Put("/workspace/{id}", controller.Update)
+	router.Get("/oauth/mattermost/{workspaceId}/login", controller.MattermostLogin)
+	router.Get("/oauth/mattermost/callback", controller.MattermostOauth)
 
 	apiGateway := gateway.NewGateway()
 	apiGateway.StartAPI(router)

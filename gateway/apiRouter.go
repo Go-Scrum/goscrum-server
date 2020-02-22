@@ -41,7 +41,7 @@ func (r APIRouter) Post(path string, handler HandlerAPIFunc) {
 	}
 }
 
-func (r APIRouter) Put(path string, handler HandlerAPIFunc, roles []string) {
+func (r APIRouter) Put(path string, handler HandlerAPIFunc) {
 	if resource, ok := r.tree[path]; ok {
 		resource[http.MethodPut] = Resource{handler: handler}
 	} else {
@@ -49,7 +49,7 @@ func (r APIRouter) Put(path string, handler HandlerAPIFunc, roles []string) {
 	}
 }
 
-func (r APIRouter) Delete(path string, handler HandlerAPIFunc, roles []string) {
+func (r APIRouter) Delete(path string, handler HandlerAPIFunc) {
 	if resource, ok := r.tree[path]; ok {
 		resource[http.MethodDelete] = Resource{handler: handler}
 	} else {

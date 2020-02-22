@@ -11,6 +11,11 @@ package:
   include:
     - ./bin/**
 
+custom:
+  # Our stage is based on what is passed in when running serverless
+  # commands. Or fallsback to what we have set in the provider section.
+  stage: ${opt:stage, self:provider.stage}
+
 provider:
   name: aws
   runtime: go1.x
@@ -25,6 +30,7 @@ provider:
     DATABASE_HOSTNAME: ${env:DATABASE_HOSTNAME}
     DATABASE_USERNAME: ${env:DATABASE_USERNAME}
     DATABASE_PASSWORD: ${env:DATABASE_PASSWORD}
+    API_URL: ${file(./serverless.${self:custom.stage}.yaml):API_URL}
 
 functions:
   migrate:
@@ -45,8 +51,12 @@ functions:
     handler: bin/oauth
     events:
       - http:
-          path: oauth/mattermost/register
+          path: oauth/mattermost/{workspaceId}/login
           method: get
+          request:
+            parameters:
+              pathParameters:
+                workspaceId: true
       - http:
           path: oauth/mattermost/callback
           method: get
@@ -54,3 +64,22 @@ functions:
             parameters:
               querystrings:
                 code: true
+
+  mattermost:
+    handler: bin/mattermost
+    events:
+      - http:
+          path: mattermost/{workspaceId}/channels
+          method: get
+          request:
+            parameters:
+              pathParameters:
+                workspaceId: true
+
+      - http:
+          path: mattermost/{workspaceId}/teams
+          method: get
+          request:
+            parameters:
+              pathParameters:
+                workspaceId: true
