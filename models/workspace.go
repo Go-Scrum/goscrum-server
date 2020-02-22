@@ -24,3 +24,4 @@ type Workspace struct {
 	Expiry        *time.Time    `json:"expiry,omitempty"`
 	Projects      []*Project
 }
+
