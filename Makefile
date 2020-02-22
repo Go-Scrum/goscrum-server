@@ -3,6 +3,7 @@ build:
 	env GOOS=linux go build -ldflags="-s -w" -o bin/workspace handlers/workspace/main.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/oauth handlers/oauth/main.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/mattermost handlers/mattermost/main.go
+	env GOOS=linux go build -ldflags="-s -w" -o bin/project handlers/project/main.go
 
 run:
 	# build the package

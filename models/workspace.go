@@ -26,3 +26,4 @@ type Workspace struct {
 	PersonalToken string        `json:"personal_token,omitempty"`
 	Projects      []*Project
 }
+
