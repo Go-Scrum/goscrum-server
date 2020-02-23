@@ -103,3 +103,7 @@ functions:
               pathParameters:
                 workspaceId: true
                 channelId: true
+
+      - http:
+          path: mattermost/bot
+          method: get

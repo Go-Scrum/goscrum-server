@@ -4,6 +4,7 @@ import (
 	"goscrum/server/services"
 	"goscrum/server/util"
 	"net/http"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	jsoniter "github.com/json-iterator/go"
@@ -78,6 +79,34 @@ func (m *MattermostController) GetTeams(req events.APIGatewayProxyRequest) (even
 	}
 
 	result, err := json.MarshalToString(teams)
+	if err != nil {
+		return util.ResponseError(http.StatusBadRequest, err.Error())
+	}
+
+	return util.Success(result)
+}
+
+func (m *MattermostController) GetWorkspaceByBot(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	reqToken, err := util.GetStringKey(req.Headers, "Authorization")
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	splitToken := strings.Split(strings.ToLower(reqToken), "bearer")
+	if len(splitToken) != 2 {
+		return util.ClientError(http.StatusUnauthorized)
+	}
+
+	token := strings.TrimSpace(splitToken[1])
+
+	workspace, err := m.service.GetWorkspaceByToken(token)
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	result, err := json.MarshalToString(workspace)
 	if err != nil {
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}

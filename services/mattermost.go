@@ -131,3 +131,8 @@ func (m *MattermostService) Standup(personalToken, channelId, userId, botId stri
 	}
 	return nil
 }
+
+//GetWorkspace returns a particular bot
+func (m *MattermostService) GetWorkspaceByToken(token string) (models.Workspace, error) {
+	return m.workspaceService.GetWorkspaceByToken(token)
+}

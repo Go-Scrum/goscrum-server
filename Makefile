@@ -15,10 +15,11 @@ run:
 run-local-server:
 	# run sam server locally
 	#sam local start-api
-	sls offline --useDocker
+	sls offline --useDocker --host $(DATABASE_HOSTNAME)
 
 run-local-db:
 	# run database locally
 	docker-compose -f  docker-compose.local.yaml up --build
+#   echo '${DATABASE_HOSTNAME}'
 
 run-local: run-local-db run-local-server
