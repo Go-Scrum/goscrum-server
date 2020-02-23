@@ -102,3 +102,4 @@ functions:
             parameters:
               pathParameters:
                 workspaceId: true
+                channelId: true
