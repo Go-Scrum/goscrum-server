@@ -18,4 +18,5 @@ type Answer struct {
 	Comment     string       `db:"comment" json:"comment"`
 	Status      AnswerStatus `db:"status" json:"status"`
 	MessageTS   string       `db:"message_ts" json:"message_ts"`
+	Question    Question
 }
