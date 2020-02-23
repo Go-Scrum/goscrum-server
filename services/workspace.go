@@ -95,6 +95,9 @@ func (service *WorkspaceService) GetWorkspace(id string) (models.Workspace, erro
 func (service *WorkspaceService) GetWorkspaceByToken(token string) (models.Workspace, error) {
 	workspace := models.Workspace{}
 	err := service.db.
+		Preload("Projects").
+		Preload("Projects.Questions").
+		Preload("Projects.Participants").
 		Where("personal_token = ?", token).
 		First(&workspace).Error
 

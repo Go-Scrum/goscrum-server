@@ -44,7 +44,38 @@ func (m *MattermostService) GetAllPublicChannels(workspaceId string) ([]models.C
 		return channels, nil
 	}
 	// TODO edge case, when token is expired
-	return nil, http.ErrNotSupported
+	return nil, res.Error
+}
+
+func (m *MattermostService) GetParticipants(workspaceId, channelId string) ([]models.Participant, error) {
+	workspace, err := m.workspaceService.GetWorkspace(workspaceId)
+	var participants []models.Participant
+
+	if err != nil {
+		return participants, err
+	}
+	apiClient := model.NewAPIv4Client(workspace.URL)
+	apiClient.SetOAuthToken(workspace.AccessToken)
+
+	// TODO -- need to work on pagination
+	users, res := apiClient.GetUsersInChannel(channelId, 0, 100, "")
+
+	if res.StatusCode == 200 {
+		for _, user := range users {
+			participants = append(participants, models.Participant{
+				Email:       user.Email,
+				UserID:      user.Id,
+				WorkspaceID: workspaceId,
+				Role:        user.Roles,
+				RealName:    user.Username,
+				FirstName:   user.FirstName,
+				LastName:    user.LastName,
+			})
+		}
+		return participants, nil
+	}
+	// TODO edge case, when token is expired
+	return nil, res.Error
 }
 
 func (m *MattermostService) GetAllTeams(workspaceId string) ([]models.Team, error) {

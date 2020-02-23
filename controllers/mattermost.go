@@ -10,10 +10,10 @@ import (
 )
 
 type MattermostController struct {
-	service services.BotService
+	service services.MattermostService
 }
 
-func NewMattermostController(service services.BotService) MattermostController {
+func NewMattermostController(service services.MattermostService) MattermostController {
 	return MattermostController{service: service}
 }
 
@@ -31,6 +31,32 @@ func (m *MattermostController) GetChannels(req events.APIGatewayProxyRequest) (e
 	}
 
 	result, err := json.MarshalToString(channels)
+	if err != nil {
+		return util.ResponseError(http.StatusBadRequest, err.Error())
+	}
+
+	return util.Success(result)
+}
+
+func (m *MattermostController) GetParticipants(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	workspaceId, err := util.GetStringKey(req.PathParameters, "workspaceId")
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	channelId, err := util.GetStringKey(req.PathParameters, "channelId")
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	participants, err := m.service.GetParticipants(workspaceId, channelId)
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	result, err := json.MarshalToString(participants)
 	if err != nil {
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}

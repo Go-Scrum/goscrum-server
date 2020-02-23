@@ -94,3 +94,11 @@ functions:
             parameters:
               pathParameters:
                 workspaceId: true
+
+      - http:
+          path: mattermost/{workspaceId}/{channelId}/participants
+          method: get
+          request:
+            parameters:
+              pathParameters:
+                workspaceId: true
