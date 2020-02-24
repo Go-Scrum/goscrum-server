@@ -3,6 +3,7 @@ package models
 // Project model used for serialization/deserialization stored Projects
 type Project struct {
 	Model
+	Name             string         `db:"name" json:"name"`
 	WorkspaceID      string         `db:"workspace_id" json:"workspace_id"`
 	ChannelName      string         `db:"channel_name" json:"channel_name"`
 	ChannelID        string         `db:"channel_id" json:"channel_id"`

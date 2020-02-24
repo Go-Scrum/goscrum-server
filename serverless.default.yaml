@@ -107,3 +107,12 @@ functions:
       - http:
           path: mattermost/bot
           method: get
+
+      - http:
+          path: /mattermost/bot/{projectId}/{participantId}/question
+          method: get
+          request:
+            parameters:
+              pathParameters:
+                projectId: true
+                participantId: true

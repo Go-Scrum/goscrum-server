@@ -55,7 +55,28 @@ func (p *ProjectController) GetAll(req events.APIGatewayProxyRequest) (events.AP
 	return util.Success(string(resp))
 }
 
-func (p *ProjectController) GetbyID(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (p *ProjectController) GetById(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	id, err := util.GetStringKey(req.PathParameters, "id")
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	project, err := p.service.GetByID(id)
+	if err != nil {
+		return util.ResponseError(http.StatusInternalServerError, err.Error())
+	}
+
+	resp, err := json.Marshal(project)
+	if err != nil {
+		return util.ResponseError(http.StatusInternalServerError, err.Error())
+	}
+
+	return util.Success(string(resp))
+}
+
+func (p *ProjectController) GetParticipantQuestion(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 	id, err := util.GetStringKey(req.PathParameters, "id")

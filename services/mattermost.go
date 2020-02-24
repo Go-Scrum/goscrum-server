@@ -11,10 +11,11 @@ import (
 
 type MattermostService struct {
 	workspaceService WorkspaceService
+	projectService   ProjectService
 }
 
-func NewMattermostService(workspaceService WorkspaceService) MattermostService {
-	return MattermostService{workspaceService: workspaceService}
+func NewMattermostService(workspaceService WorkspaceService, projectService ProjectService) MattermostService {
+	return MattermostService{workspaceService: workspaceService, projectService: projectService}
 }
 
 func (m *MattermostService) GetAllPublicChannels(workspaceId string) ([]models.Channel, error) {
@@ -135,4 +136,9 @@ func (m *MattermostService) Standup(personalToken, channelId, userId, botId stri
 //GetWorkspace returns a particular bot
 func (m *MattermostService) GetWorkspaceByToken(token string) (models.Workspace, error) {
 	return m.workspaceService.GetWorkspaceByToken(token)
+}
+
+//GetWorkspace returns a particular bot
+func (m *MattermostService) GetParticipantQuestion(projectId, participantId string) (*models.Question, error) {
+	return m.projectService.GetParticipantQuestion(projectId, participantId)
 }

@@ -23,7 +23,7 @@ func main() {
 
 	router.Post("/projects", controller.Save)
 	router.Get("/projects", controller.GetAll)
-	router.Get("/projects/{id}", controller.GetbyID)
+	router.Get("/projects/{id}", controller.GetById)
 
 	apiGateway := gateway.NewGateway()
 	apiGateway.StartAPI(router)
