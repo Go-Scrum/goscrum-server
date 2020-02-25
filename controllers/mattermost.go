@@ -141,12 +141,12 @@ func (m *MattermostController) GetParticipantQuestion(req events.APIGatewayProxy
 
 	//token := strings.TrimSpace(splitToken[1])
 
-	workspace, err := m.service.GetParticipantQuestion(projectId, participantId)
+	question, err := m.service.GetParticipantQuestion(projectId, participantId)
 	if err != nil {
 		return util.ServerError(err)
 	}
 
-	result, err := json.MarshalToString(workspace)
+	result, err := json.MarshalToString(question)
 	if err != nil {
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}
@@ -154,7 +154,41 @@ func (m *MattermostController) GetParticipantQuestion(req events.APIGatewayProxy
 	return util.Success(result)
 }
 
-func (m *MattermostController) UpdateAnswerStatus(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (m *MattermostController) GetQuestionDetails(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	// TODO Validate with personal token
+	//reqToken, err := util.GetStringKey(req.Headers, "Authorization")
+	//if err != nil {
+	//	return util.ServerError(err)
+	//}
+	//
+	//splitToken := strings.Split(strings.ToLower(reqToken), "bearer")
+	//if len(splitToken) != 2 {
+	//	return util.ClientError(http.StatusUnauthorized)
+	//}
+
+	//token := strings.TrimSpace(splitToken[1])
+
+	questionId, err := util.GetStringKey(req.PathParameters, "questionId")
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	question, err := m.service.GetQuestionDetails(questionId)
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	result, err := json.MarshalToString(question)
+	if err != nil {
+		return util.ResponseError(http.StatusBadRequest, err.Error())
+	}
+
+	return util.Success(result)
+}
+
+func (m *MattermostController) SaveAnswer(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// TODO Validate with personal token
@@ -177,7 +211,7 @@ func (m *MattermostController) UpdateAnswerStatus(req events.APIGatewayProxyRequ
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}
 
-	err = m.service.UpdateAnswerStatus(answer)
+	err = m.service.SaveAnswer(answer)
 	if err != nil {
 		return util.ServerError(err)
 	}

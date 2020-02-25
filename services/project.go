@@ -38,7 +38,7 @@ func (service *ProjectService) GetByID(id string) (models.Project, error) {
 	return project, err
 }
 
-func (service *ProjectService) UpdateAnswerStatus(answer models.Answer) error {
+func (service *ProjectService) SaveAnswer(answer models.Answer) error {
 	return service.db.Save(&answer).Error
 }
 
@@ -68,12 +68,26 @@ func (service *ProjectService) GetParticipantQuestion(projectId, participantId s
 		return nil, err
 	}
 
-	for _, question := range questions {
-		if !isAnswered(answers, question) {
-			return &question, nil
+	question := models.Question{}
+	for _, ques := range questions {
+		if !isAnswered(answers, ques) {
+			question = ques
+			break
 		}
 	}
-	return nil, nil
+	return &question, nil
+}
+
+func (service *ProjectService) GetQuestionDetails(questionId string) (*models.Question, error) {
+	question := models.Question{}
+
+	err := service.db.Where("id = ?", questionId).First(&question).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Need to call integration to get more information about the question
+	return &question, nil
 }
 
 func isAnswered(answers []models.Answer, question models.Question) bool {

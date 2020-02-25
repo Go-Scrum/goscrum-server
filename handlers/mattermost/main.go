@@ -24,7 +24,8 @@ func main() {
 	router.Get("/mattermost/{workspaceId}/{channelId}/participants", controller.GetParticipants)
 	router.Get("/mattermost/bot", controller.GetWorkspaceByBot)
 	router.Get("/mattermost/bot/{projectId}/{participantId}/question", controller.GetParticipantQuestion)
-	router.Post("/mattermost/bot/answer", controller.UpdateAnswerStatus)
+	router.Get("/mattermost/bot/question/{questionId}", controller.GetQuestionDetails)
+	router.Post("/mattermost/bot/answer", controller.SaveAnswer)
 
 	apiGateway := gateway.NewGateway()
 	apiGateway.StartAPI(router)

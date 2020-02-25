@@ -118,5 +118,13 @@ functions:
                 participantId: true
 
       - http:
+          path: /mattermost/bot/question/{questionId}
+          method: get
+          request:
+            parameters:
+              pathParameters:
+                questionId: true
+
+      - http:
           path: /mattermost/bot/answer
           method: post
