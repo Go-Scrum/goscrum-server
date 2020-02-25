@@ -39,7 +39,24 @@ func (service *ProjectService) GetByID(id string) (models.Project, error) {
 }
 
 func (service *ProjectService) SaveAnswer(answer models.Answer) error {
-	return service.db.Save(&answer).Error
+	existingAnswer := models.Answer{}
+	today := time.Now()
+	yesterday := today.AddDate(0, 0, -1)
+	err := service.db.Where("question_id = (?) AND participant_id = ? AND updated_at BETWEEN ? AND ?",
+		answer.QuestionID,
+		answer.ParticipantID,
+		yesterday,
+		today,
+	).First(&existingAnswer).Error
+
+	if err != nil && !gorm.IsRecordNotFoundError(err) {
+		return err
+	}
+	if gorm.IsRecordNotFoundError(err) {
+		return service.db.Save(&answer).Error
+	}
+	existingAnswer.Comment = answer.Comment
+	return service.db.Save(&existingAnswer).Error
 }
 
 func (service *ProjectService) GetParticipantQuestion(projectId, participantId string) (*models.Question, error) {
