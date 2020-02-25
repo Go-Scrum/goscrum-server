@@ -116,3 +116,7 @@ functions:
               pathParameters:
                 projectId: true
                 participantId: true
+
+      - http:
+          path: /mattermost/bot/answer
+          method: post

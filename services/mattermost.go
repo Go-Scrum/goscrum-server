@@ -142,3 +142,7 @@ func (m *MattermostService) GetWorkspaceByToken(token string) (models.Workspace,
 func (m *MattermostService) GetParticipantQuestion(projectId, participantId string) (*models.Question, error) {
 	return m.projectService.GetParticipantQuestion(projectId, participantId)
 }
+
+func (m *MattermostService) UpdateAnswerStatus(answer models.Answer) error {
+	return m.projectService.UpdateAnswerStatus(answer)
+}

@@ -3,6 +3,7 @@ module goscrum/server
 go 1.13
 
 require (
+	github.com/1set/cronrange v0.0.0-20191119140312-5bcc16d177dc
 	github.com/aws/aws-lambda-go v1.13.3
 	github.com/davecgh/go-spew v1.1.1
 	github.com/go-ldap/ldap v3.0.3+incompatible // indirect

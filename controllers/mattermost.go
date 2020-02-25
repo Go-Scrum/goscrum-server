@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"goscrum/server/models"
 	"goscrum/server/services"
 	"goscrum/server/util"
 	"net/http"
@@ -151,4 +152,35 @@ func (m *MattermostController) GetParticipantQuestion(req events.APIGatewayProxy
 	}
 
 	return util.Success(result)
+}
+
+func (m *MattermostController) UpdateAnswerStatus(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	// TODO Validate with personal token
+	//reqToken, err := util.GetStringKey(req.Headers, "Authorization")
+	//if err != nil {
+	//	return util.ServerError(err)
+	//}
+	//
+	//splitToken := strings.Split(strings.ToLower(reqToken), "bearer")
+	//if len(splitToken) != 2 {
+	//	return util.ClientError(http.StatusUnauthorized)
+	//}
+
+	//token := strings.TrimSpace(splitToken[1])
+
+	answer := models.Answer{}
+
+	err := json.Unmarshal([]byte(req.Body), &answer)
+	if err != nil {
+		return util.ResponseError(http.StatusBadRequest, err.Error())
+	}
+
+	err = m.service.UpdateAnswerStatus(answer)
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	return util.Success("")
 }

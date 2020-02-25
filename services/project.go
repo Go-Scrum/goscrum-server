@@ -2,6 +2,7 @@ package services
 
 import (
 	"goscrum/server/models"
+	"time"
 
 	"github.com/jinzhu/gorm"
 )
@@ -37,10 +38,14 @@ func (service *ProjectService) GetByID(id string) (models.Project, error) {
 	return project, err
 }
 
+func (service *ProjectService) UpdateAnswerStatus(answer models.Answer) error {
+	return service.db.Save(&answer).Error
+}
+
 func (service *ProjectService) GetParticipantQuestion(projectId, participantId string) (*models.Question, error) {
 	var questions []models.Question
 
-	err := service.db.Find(&questions).Where("project_id = ?", projectId).Error
+	err := service.db.Find(&questions).Error
 	if err != nil {
 		return nil, err
 	}
@@ -50,25 +55,32 @@ func (service *ProjectService) GetParticipantQuestion(projectId, participantId s
 		questionIDs = append(questionIDs, question.ID)
 	}
 
-	// TODO -- need to add date in this
 	var answers []models.Answer
-	err = service.db.Find(&answers).Where("question_id in (?) AND participant_id = ?",
+	today := time.Now()
+	yesterday := today.AddDate(0, 0, -1)
+	err = service.db.Where("question_id in (?) AND participant_id = ? AND updated_at BETWEEN ? AND ?",
 		questionIDs,
 		participantId,
-	).Error
+		yesterday,
+		today,
+	).Find(&answers).Error
 	if err != nil {
 		return nil, err
 	}
 
 	for _, question := range questions {
-		for _, answer := range answers {
-			if answer.QuestionID != question.ID {
-				return &question, nil
-			}
+		if !isAnswered(answers, question) {
+			return &question, nil
 		}
 	}
+	return nil, nil
+}
 
-	// For question, get the list of integration
-	// TODO think for edge cases
-	return &questions[0], nil
+func isAnswered(answers []models.Answer, question models.Question) bool {
+	for _, answer := range answers {
+		if answer.QuestionID == question.ID {
+			return true
+		}
+	}
+	return false
 }

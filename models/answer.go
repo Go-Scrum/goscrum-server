@@ -11,13 +11,10 @@ const (
 // Standup model used for serialization/deserialization stored standups
 type Answer struct {
 	Model
-	WorkspaceID   string       `db:"workspace_id" json:"workspace_id"`
-	ChannelID     string       `db:"channel_id" json:"channel_id"`
-	ParticipantID string       `db:"participant_id" json:"participant_id"`
-	QuestionID    string       `db:"question_id" json:"question_id"`
-	Comment       string       `db:"comment" json:"comment"`
-	Status        AnswerStatus `db:"status" json:"status"`
-	MessageTS     string       `db:"message_ts" json:"message_ts"`
+	ParticipantID string `db:"participant_id" json:"participant_id"`
+	QuestionID    string `db:"question_id" json:"question_id"`
+	Comment       string `db:"comment" json:"comment"`
+	BotPostId     string `db:"bot_post_id" json:"bot_post_id"`
 	Question      Question
 	Participant   Participant
 }
