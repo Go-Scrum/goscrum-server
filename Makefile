@@ -32,3 +32,6 @@ deploy:
 
 remove:
 	sls remove --stage $(STAGE) -v --region $(REGION)
+
+migrate:
+	sls invoke -f migrate --stage $(STAGE) -v --region $(REGION)
