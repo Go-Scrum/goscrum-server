@@ -28,25 +28,7 @@ deploy:
 	make build
 
 	cp serverless.default.yaml serverless.yml
-
-#	ifdef prod
-#    sls deploy --stage prod -v --region us-east-1
-#    else
-#	ifdef stage
-#	sls deploy --stage stage -v --region ap-south-1
-#    else
-#    sls deploy --stage dev -v --region ap-south-1
-#    endif
-	sls deploy --stage stage -v --region ap-south-1
-
-
+	sls deploy --stage $(STAGE) -v --region $(REGION)
 
 remove:
-	ifdef prod
-	sls remove --stage prod -v --region us-east-1
-	else
-	ifdef stage
-	sls remove --stage stage -v --region ap-south-1
-	else
-	sls remove --stage dev -v --region ap-south-1
-	endif
+	sls remove --stage $(STAGE) -v --region $(REGION)
