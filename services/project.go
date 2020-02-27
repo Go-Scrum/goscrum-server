@@ -38,7 +38,7 @@ func (service *ProjectService) GetByID(id string) (models.Project, error) {
 	return project, err
 }
 
-func (service *ProjectService) SaveAnswer(answer models.Answer) error {
+func (service *ProjectService) UpdateAnswerPostId(answer models.Answer) error {
 	existingAnswer := models.Answer{}
 	today := time.Now()
 	yesterday := today.AddDate(0, 0, -1)
@@ -59,10 +59,50 @@ func (service *ProjectService) SaveAnswer(answer models.Answer) error {
 	return service.db.Save(&existingAnswer).Error
 }
 
+func (service *ProjectService) UserMessage(userId string, answer models.Answer) (*models.Answer, error) {
+	participant := models.Participant{}
+	err := service.db.
+		Where("user_id = ?", userId).
+		First(&participant).Error
+
+	if err != nil && !gorm.IsRecordNotFoundError(err) {
+		return nil, err
+	}
+
+	if gorm.IsRecordNotFoundError(err) {
+		// TODO -- send message to asked for admin to configure for your channels
+		return nil, err
+	}
+
+	existingAnswer := models.Answer{}
+	today := time.Now()
+	yesterday := today.AddDate(0, 0, -1)
+	err = service.db.
+		Where("participant_id = ? AND updated_at BETWEEN ? AND ?",
+			participant.ID,
+			yesterday,
+			today,
+		).
+		Order("updated_at desc").
+		First(&existingAnswer).Error
+
+	if err != nil && !gorm.IsRecordNotFoundError(err) {
+		return nil, err
+	}
+	if gorm.IsRecordNotFoundError(err) {
+		// TODO need to check when record not found
+		return nil, nil
+	}
+	existingAnswer.Comment = answer.Comment
+	existingAnswer.ParticipantID = participant.ID
+	err = service.db.Save(&existingAnswer).Error
+	return &existingAnswer, nil
+}
+
 func (service *ProjectService) GetParticipantQuestion(projectId, participantId string) (*models.Question, error) {
 	var questions []models.Question
 
-	err := service.db.Find(&questions).Error
+	err := service.db.Where("project_id = ?", projectId).Find(&questions).Error
 	if err != nil {
 		return nil, err
 	}

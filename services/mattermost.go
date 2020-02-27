@@ -143,8 +143,12 @@ func (m *MattermostService) GetParticipantQuestion(projectId, participantId stri
 	return m.projectService.GetParticipantQuestion(projectId, participantId)
 }
 
-func (m *MattermostService) SaveAnswer(answer models.Answer) error {
-	return m.projectService.SaveAnswer(answer)
+func (m *MattermostService) UpdateAnswerPostId(answer models.Answer) error {
+	return m.projectService.UpdateAnswerPostId(answer)
+}
+
+func (m *MattermostService) UserMessage(userId string, answer models.Answer) (*models.Answer, error) {
+	return m.projectService.UserMessage(userId, answer)
 }
 
 func (m *MattermostService) GetQuestionDetails(questionId string) (*models.Question, error) {

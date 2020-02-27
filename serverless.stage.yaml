@@ -1,1 +1,4 @@
-API_URL: 'http://api.stage.goscrum.io'
+API_URL: 'https://api.stage.goscrum.io'
+API_REST_ID: 'mc7jx3e650'
+API_RESOURCE_ID: 'dw13tg940e'
+AWS_REGION: 'ap-south-1'

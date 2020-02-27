@@ -2,7 +2,6 @@ service: goscrum-server
 
 # Use the serverless-webpack plugin to transpile ES6
 plugins:
-  - serverless-plugin-tracing
   - serverless-offline
 
 package:
@@ -19,11 +18,12 @@ custom:
 provider:
   name: aws
   runtime: go1.x
-  stage: dev
-  region: ap-south-1
-  tracing: true
-  memorySize: 124 # optional, in MB, default is 1024
+  profile: goscrum
+  memorySize: 256 # optional, in MB, default is 1024
   timeout: 30 # optional, in seconds, default is 6
+  apiGateway:
+    restApiId: ${file(./serverless.${self:custom.stage}.yaml):API_REST_ID}
+    restApiRootResourceId: ${file(./serverless.${self:custom.stage}.yaml):API_RESOURCE_ID}
   environment:
     DEBUG: true
     DATABASE_NAME: ${env:DATABASE_NAME}
@@ -126,5 +126,9 @@ functions:
                 questionId: true
 
       - http:
-          path: /mattermost/bot/answer
+          path: /mattermost/bot/answer/post
+          method: post
+
+      - http:
+          path: /mattermost/user/{userId}/message
           method: post

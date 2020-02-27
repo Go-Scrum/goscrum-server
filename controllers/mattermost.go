@@ -188,7 +188,7 @@ func (m *MattermostController) GetQuestionDetails(req events.APIGatewayProxyRequ
 	return util.Success(result)
 }
 
-func (m *MattermostController) SaveAnswer(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (m *MattermostController) UpdateAnswerPostId(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// TODO Validate with personal token
@@ -211,10 +211,50 @@ func (m *MattermostController) SaveAnswer(req events.APIGatewayProxyRequest) (ev
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}
 
-	err = m.service.SaveAnswer(answer)
+	err = m.service.UpdateAnswerPostId(answer)
 	if err != nil {
 		return util.ServerError(err)
 	}
 
 	return util.Success("")
+}
+
+func (m *MattermostController) UserMessage(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	// TODO Validate with personal token
+	//reqToken, err := util.GetStringKey(req.Headers, "Authorization")
+	//if err != nil {
+	//	return util.ServerError(err)
+	//}
+	//
+	//splitToken := strings.Split(strings.ToLower(reqToken), "bearer")
+	//if len(splitToken) != 2 {
+	//	return util.ClientError(http.StatusUnauthorized)
+	//}
+
+	//token := strings.TrimSpace(splitToken[1])
+
+	userId, err := util.GetStringKey(req.PathParameters, "userId")
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	answer := models.Answer{}
+
+	err = json.Unmarshal([]byte(req.Body), &answer)
+	if err != nil {
+		return util.ResponseError(http.StatusBadRequest, err.Error())
+	}
+
+	existingAnswer, err := m.service.UserMessage(userId, answer)
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	result, err := json.MarshalToString(existingAnswer)
+	if err != nil {
+		return util.ResponseError(http.StatusBadRequest, err.Error())
+	}
+
+	return util.Success(result)
 }
