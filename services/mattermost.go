@@ -3,9 +3,7 @@ package services
 import (
 	"goscrum/server/models"
 	"net/http"
-	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/mattermost/mattermost-server/v5/model"
 )
 
@@ -107,32 +105,6 @@ func (m *MattermostService) GetAllTeams(workspaceId string) ([]models.Team, erro
 	return nil, http.ErrNotSupported
 }
 
-func (m *MattermostService) Standup(personalToken, channelId, userId, botId string) error {
-	workspace, err := m.workspaceService.GetWorkspaceByToken(personalToken)
-	if err != nil {
-		return err
-	}
-	apiClient := model.NewAPIv4Client(workspace.URL)
-	apiClient.SetOAuthToken(workspace.AccessToken)
-
-	post, res := apiClient.CreatePost(&model.Post{
-		Id:            "",
-		CreateAt:      time.Now().Unix(),
-		IsPinned:      false,
-		UserId:        botId,
-		ChannelId:     channelId,
-		Message:       "Hello Duragaprasad",
-		MessageSource: "",
-	})
-
-	spew.Dump(post)
-
-	if res.StatusCode != 200 {
-		return res.Error
-	}
-	return nil
-}
-
 //GetWorkspace returns a particular bot
 func (m *MattermostService) GetWorkspaceByToken(token string) (models.Workspace, error) {
 	return m.workspaceService.GetWorkspaceByToken(token)
@@ -147,8 +119,8 @@ func (m *MattermostService) UpdateAnswerPostId(answer models.Answer) error {
 	return m.projectService.UpdateAnswerPostId(answer)
 }
 
-func (m *MattermostService) UserMessage(userId string, answer models.Answer) (*models.Answer, error) {
-	return m.projectService.UserMessage(userId, answer)
+func (m *MattermostService) UserInteraction(userId string, message models.Message) (*models.Message, error) {
+	return m.projectService.UserInteraction(userId, message)
 }
 
 func (m *MattermostService) GetQuestionDetails(questionId string) (*models.Question, error) {

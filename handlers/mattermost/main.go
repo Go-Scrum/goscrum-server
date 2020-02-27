@@ -26,7 +26,7 @@ func main() {
 	router.Get("/mattermost/bot/{projectId}/{participantId}/question", controller.GetParticipantQuestion)
 	router.Get("/mattermost/bot/question/{questionId}", controller.GetQuestionDetails)
 	router.Post("/mattermost/bot/answer/post", controller.UpdateAnswerPostId)
-	router.Post("/mattermost/user/{userId}/message", controller.UserMessage)
+	router.Post("/mattermost/bot/user/{userId}/message", controller.UserInteraction)
 
 	apiGateway := gateway.NewGateway()
 	apiGateway.StartAPI(router)

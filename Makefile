@@ -17,12 +17,14 @@ run-local-server:
 	#sam local start-api
 	sls offline --useDocker --host $(DATABASE_HOSTNAME)
 
+migrate-local:
+	sls invoke local -f migrate --stage dev
+
 run-local-db:
 	# run database locally
 	docker-compose -f  docker-compose.local.yaml up --build
-#   echo '${DATABASE_HOSTNAME}'
 
-run-local: run-local-db run-local-server
+run-local: run-local-db run-local-server migrate-local
 
 deploy:
 	make build

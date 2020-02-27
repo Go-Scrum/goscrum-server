@@ -36,10 +36,6 @@ provider:
 functions:
   migrate:
     handler: bin/migrate
-    events:
-      - http:
-          path: migrate
-          method: get
 
   workspace:
     handler: bin/workspace
@@ -130,5 +126,5 @@ functions:
           method: post
 
       - http:
-          path: /mattermost/user/{userId}/message
+          path: /mattermost/bot/user/{userId}/message
           method: post

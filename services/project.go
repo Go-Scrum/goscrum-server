@@ -2,6 +2,7 @@ package services
 
 import (
 	"goscrum/server/models"
+	"strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -55,11 +56,11 @@ func (service *ProjectService) UpdateAnswerPostId(answer models.Answer) error {
 	if gorm.IsRecordNotFoundError(err) {
 		return service.db.Save(&answer).Error
 	}
-	existingAnswer.Comment = answer.Comment
 	return service.db.Save(&existingAnswer).Error
 }
 
-func (service *ProjectService) UserMessage(userId string, answer models.Answer) (*models.Answer, error) {
+func (service *ProjectService) UserInteraction(userId string, message models.Message) (*models.Message, error) {
+	// TODO - need to check for workspace project name too here for extra validation
 	participant := models.Participant{}
 	err := service.db.
 		Where("user_id = ?", userId).
@@ -74,10 +75,15 @@ func (service *ProjectService) UserMessage(userId string, answer models.Answer) 
 		return nil, err
 	}
 
+	if strings.ToLower(message.Content) == "cancel" || strings.ToLower(message.Content) == "cancelled" {
+		// TODO -cancel standup
+	}
+
 	existingAnswer := models.Answer{}
 	today := time.Now()
 	yesterday := today.AddDate(0, 0, -1)
 	err = service.db.
+		Preload("Question").
 		Where("participant_id = ? AND updated_at BETWEEN ? AND ?",
 			participant.ID,
 			yesterday,
@@ -93,10 +99,56 @@ func (service *ProjectService) UserMessage(userId string, answer models.Answer) 
 		// TODO need to check when record not found
 		return nil, nil
 	}
-	existingAnswer.Comment = answer.Comment
+	existingAnswer.Comment = message.Content
 	existingAnswer.ParticipantID = participant.ID
 	err = service.db.Save(&existingAnswer).Error
-	return &existingAnswer, nil
+
+	if err != nil {
+		return nil, err
+	}
+
+	var questions []models.Question
+	err = service.db.Where("project_id = ?", existingAnswer.Question.ProjectId).Find(&questions).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var questionIDs []string
+	for _, question := range questions {
+		questionIDs = append(questionIDs, question.ID)
+	}
+
+	today = time.Now()
+	yesterday = today.AddDate(0, 0, -1)
+	var answers []models.Answer
+	err = service.db.Where("question_id in (?) AND participant_id = ? AND updated_at BETWEEN ? AND ?",
+		questionIDs,
+		participant.ID,
+		yesterday,
+		today,
+	).Find(&answers).Error
+	if err != nil {
+		return nil, err
+	}
+
+	question := models.Question{}
+	for _, ques := range questions {
+		if !isAnswered(answers, ques) {
+			question = ques
+			break
+		}
+	}
+	if question.Title == "" {
+		// TODO -- all questions are done - send completion message
+		return nil, nil
+	}
+	return &models.Message{
+		Content:       question.Title,
+		UserId:        userId,
+		MessageType:   models.QuestionMessage,
+		ParticipantID: participant.ID,
+		Question:      question,
+	}, nil
 }
 
 func (service *ProjectService) GetParticipantQuestion(projectId, participantId string) (*models.Question, error) {

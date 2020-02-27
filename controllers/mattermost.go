@@ -219,7 +219,7 @@ func (m *MattermostController) UpdateAnswerPostId(req events.APIGatewayProxyRequ
 	return util.Success("")
 }
 
-func (m *MattermostController) UserMessage(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (m *MattermostController) UserInteraction(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	// TODO Validate with personal token
 	//reqToken, err := util.GetStringKey(req.Headers, "Authorization")
@@ -239,19 +239,19 @@ func (m *MattermostController) UserMessage(req events.APIGatewayProxyRequest) (e
 		return util.ServerError(err)
 	}
 
-	answer := models.Answer{}
+	message := models.Message{}
 
-	err = json.Unmarshal([]byte(req.Body), &answer)
+	err = json.Unmarshal([]byte(req.Body), &message)
 	if err != nil {
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}
 
-	existingAnswer, err := m.service.UserMessage(userId, answer)
+	newMessage, err := m.service.UserInteraction(userId, message)
 	if err != nil {
 		return util.ServerError(err)
 	}
 
-	result, err := json.MarshalToString(existingAnswer)
+	result, err := json.MarshalToString(newMessage)
 	if err != nil {
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}
