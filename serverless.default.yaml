@@ -150,3 +150,26 @@ functions:
       - http:
           path: /mattermost/bot/user/{userId}/message
           method: post
+
+  gitlab:
+    handler: bin/gitlab
+    events:
+      - http:
+          path: gitlab/{projectId}/commits
+          method: get
+          request:
+            parameters:
+              pathParameters:
+                projectId: true
+
+      - http:
+          path: gitlab/issues
+          method: post
+
+      - http:
+          path: gitlab/users
+          method: get
+
+      - http:
+          path: gitlab/projects
+          method: get
