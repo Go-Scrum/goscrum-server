@@ -5,6 +5,7 @@ build:
 	env GOOS=linux go build -ldflags="-s -w" -o bin/mattermost handlers/mattermost/main.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/project handlers/project/main.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/bot handlers/bot/main.go
+	env GOOS=linux go build -ldflags="-s -w" -o bin/gitlab handlers/gitlab/main.go
 
 run:
 	# build the package
