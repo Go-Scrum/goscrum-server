@@ -1,11 +1,15 @@
 package services
 
 type BotService struct {
-	workspaceService WorkspaceService
+	workspaceService  WorkspaceService
+	projectService    ProjectService
+	mattermostService MattermostService
 }
 
-func NewBotService(workspaceService WorkspaceService) BotService {
+func NewBotService(workspaceService WorkspaceService, projectService ProjectService, mattermostService MattermostService) BotService {
 	return BotService{
-		workspaceService: workspaceService,
+		workspaceService:  workspaceService,
+		projectService:    projectService,
+		mattermostService: mattermostService,
 	}
 }

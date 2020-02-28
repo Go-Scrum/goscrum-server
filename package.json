@@ -6,6 +6,7 @@
   "license": "MIT",
   "devDependencies": {
     "serverless-offline": "^5.12.1",
+    "serverless-offline-scheduler": "^0.4.1",
     "serverless-plugin-tracing": "^2.0.0"
   }
 }

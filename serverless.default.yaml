@@ -3,6 +3,7 @@ service: goscrum-server
 # Use the serverless-webpack plugin to transpile ES6
 plugins:
   - serverless-offline
+  - serverless-offline-scheduler
 
 package:
   exclude:
@@ -38,12 +39,25 @@ functions:
   migrate:
     handler: bin/migrate
 
+#  bot:
+#    handler: bin/bot
+#    events:
+#      - schedule: rate(1 minute)
+
   workspace:
     handler: bin/workspace
     events:
       - http:
           path: workspace
           method: post
+          authorizer:
+            arn: arn:aws:cognito-idp:ap-south-1:145912607509:userpool/ap-south-1_MzWALNIiB
+
+      - http:
+          path: workspace
+          method: get
+          authorizer:
+            arn: arn:aws:cognito-idp:ap-south-1:145912607509:userpool/ap-south-1_MzWALNIiB
 
   project:
     handler: bin/project
@@ -51,9 +65,14 @@ functions:
       - http:
           path: projects
           method: post
+          authorizer:
+            arn: arn:aws:cognito-idp:ap-south-1:145912607509:userpool/ap-south-1_MzWALNIiB
+
       - http:
           path: projects
           method: get
+          authorizer:
+            arn: arn:aws:cognito-idp:ap-south-1:145912607509:userpool/ap-south-1_MzWALNIiB
 
   oauth:
     handler: bin/oauth

@@ -199,6 +199,10 @@ func (service *ProjectService) GetQuestionDetails(questionId string) (*models.Qu
 	return &question, nil
 }
 
+func (service *ProjectService) UpdateParticipant(participant models.Participant) error {
+	return service.db.Save(&participant).Error
+}
+
 func isAnswered(answers []models.Answer, question models.Question) bool {
 	for _, answer := range answers {
 		if answer.QuestionID == question.ID {

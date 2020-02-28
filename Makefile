@@ -4,6 +4,7 @@ build:
 	env GOOS=linux go build -ldflags="-s -w" -o bin/oauth handlers/oauth/main.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/mattermost handlers/mattermost/main.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/project handlers/project/main.go
+	env GOOS=linux go build -ldflags="-s -w" -o bin/bot handlers/bot/main.go
 
 run:
 	# build the package
@@ -31,6 +32,8 @@ deploy:
 
 	cp serverless.default.yaml serverless.yml
 	sls deploy --stage $(STAGE) -v --region $(REGION)
+
+	make migrate
 
 remove:
 	sls remove --stage $(STAGE) -v --region $(REGION)

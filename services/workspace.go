@@ -15,32 +15,23 @@ func NewWorkspaceService(db *gorm.DB) WorkspaceService {
 }
 
 //CreateWorkspace creates bot properties for the newly created bot
-func (service *WorkspaceService) Create(workspace models.Workspace) error {
+func (service *WorkspaceService) Save(workspace models.Workspace) (models.Workspace, error) {
 	//err := bs.Validate()
 	//if err != nil {
 	//	return bs, err
 	//}
-	return service.db.Create(&workspace).Error
-}
-
-//UpdateWorkspace updates bot
-func (service *WorkspaceService) Update(id string, workspace models.Workspace) error {
-	existingWorkspace := &models.Workspace{}
-	err := service.db.
-		Where("id = ?", id).
-		First(existingWorkspace).Error
-
-	if err != nil {
-		return err
-	}
-
-	return service.db.Model(&existingWorkspace).Update(&workspace).Error
+	err := service.db.Create(&workspace).Error
+	return workspace, err
 }
 
 //GetAllWorkspaces returns all workspaces stored in DB
 func (service *WorkspaceService) GetAllWorkspaces() ([]models.Workspace, error) {
 	var workspaces []models.Workspace
-	err := service.db.Find(&workspaces).Error
+	err := service.db.
+		Preload("Projects.Participants").
+		Preload("Projects.Questions").
+		Find(&workspaces).
+		Error
 
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
 		return workspaces, err
@@ -68,6 +59,19 @@ func (service *WorkspaceService) GetWorkspaceByBotAccessToken(botAccessToken str
 	workspace := models.Workspace{}
 	err := service.db.
 		Where("bot_access_token = ?", botAccessToken).
+		First(&workspace).Error
+
+	if err != nil {
+		return workspace, err
+	}
+
+	return workspace, nil
+}
+
+func (service *WorkspaceService) GetWorkspaceByUserEmail(email string) (models.Workspace, error) {
+	workspace := models.Workspace{}
+	err := service.db.
+		Where("user_email = ?", email).
 		First(&workspace).Error
 
 	if err != nil {

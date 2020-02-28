@@ -21,8 +21,8 @@ func main() {
 	controller := controllers.NewWorkspaceController(service)
 	router := gateway.NewAPIRouter()
 
-	router.Post("/workspace", controller.Create)
-	router.Put("/workspace/{id}", controller.Update)
+	router.Post("/workspace", controller.Save)
+	router.Get("/workspace", controller.Get)
 
 	apiGateway := gateway.NewGateway()
 	apiGateway.StartAPI(router)

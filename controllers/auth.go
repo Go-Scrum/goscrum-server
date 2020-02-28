@@ -99,7 +99,7 @@ func (a *AuthController) MattermostOauth(request events.APIGatewayProxyRequest) 
 		workspace.PersonalToken = base64.StdEncoding.EncodeToString(uuid.NewV4().Bytes())
 	}
 
-	err = a.workspaceService.Update(workspaceId, workspace)
+	_, err = a.workspaceService.Save(workspace)
 	// TODO for now, show error message, later redirect to beautiful page.
 	if err != nil {
 		return util.ServerError(err)

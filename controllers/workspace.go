@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"goscrum/server/models"
@@ -19,40 +20,53 @@ func NewWorkspaceController(service services.WorkspaceService) WorkspaceControll
 	return WorkspaceController{service: service}
 }
 
-func (a *WorkspaceController) Create(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (a *WorkspaceController) Save(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	workspace := models.Workspace{}
+	if claimPayload, ok := req.RequestContext.Authorizer["claims"]; ok {
+		claims := claimPayload.(map[string]interface{})
+		if claims != nil {
+			workspace.UserEmail = fmt.Sprintf("%s", claims["email"])
 
-	err := json.Unmarshal([]byte(req.Body), &workspace)
-	if err != nil {
-		return util.ResponseError(http.StatusBadRequest, err.Error())
-	}
+			err := json.Unmarshal([]byte(req.Body), &workspace)
+			if err != nil {
+				return util.ResponseError(http.StatusBadRequest, err.Error())
+			}
 
-	err = a.service.Create(workspace)
-	if err != nil {
-		return util.ResponseError(http.StatusInternalServerError, err.Error())
+			newWorkspace, err := a.service.Save(workspace)
+			if err != nil {
+				return util.ResponseError(http.StatusInternalServerError, err.Error())
+			}
+
+			result, err := json.MarshalToString(newWorkspace)
+			if err != nil {
+				return util.ResponseError(http.StatusBadRequest, err.Error())
+			}
+
+			return util.Success(result)
+		}
 	}
-	return util.Success("")
+	return util.ClientError(http.StatusUnauthorized)
 }
 
-func (a *WorkspaceController) Update(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (a *WorkspaceController) Get(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	if claimPayload, ok := req.RequestContext.Authorizer["claims"]; ok {
+		claims := claimPayload.(map[string]interface{})
+		if claims != nil {
+			email := fmt.Sprintf("%s", claims["email"])
+			workspace, err := a.service.GetWorkspaceByUserEmail(email)
+			if err != nil {
+				return util.ResponseError(http.StatusInternalServerError, err.Error())
+			}
 
-	id, err := util.GetStringKey(req.PathParameters, "id")
-	if err != nil {
-		return util.ServerError(err)
+			result, err := json.MarshalToString(workspace)
+			if err != nil {
+				return util.ResponseError(http.StatusBadRequest, err.Error())
+			}
+
+			return util.Success(result)
+		}
 	}
-
-	workspace := models.Workspace{}
-
-	err = json.Unmarshal([]byte(req.Body), &workspace)
-	if err != nil {
-		return util.ResponseError(http.StatusBadRequest, err.Error())
-	}
-
-	err = a.service.Update(id, workspace)
-	if err != nil {
-		return util.ResponseError(http.StatusInternalServerError, err.Error())
-	}
-	return util.Success("")
+	return util.ClientError(http.StatusUnauthorized)
 }

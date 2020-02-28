@@ -22,7 +22,8 @@ type Workspace struct {
 	ClientSecret  string        `json:"client_secret"`
 	AccessToken   string        `json:"access_token"`
 	RefreshToken  string        `json:"refresh_token"`
-	Expiry        *time.Time    `json:"expiry,omitempty"`
-	PersonalToken string        `json:"personal_token,omitempty"`
-	Projects      []*Project
+	Expiry        *time.Time    `json:"expiry"`
+	PersonalToken string        `json:"personal_token"`
+	Projects      []*Project    `json:"projects"`
+	UserEmail     string        `json:"user_email"`
 }
