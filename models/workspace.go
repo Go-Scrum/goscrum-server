@@ -2,10 +2,10 @@ package models
 
 import "time"
 
-type WorkspaceType int
+type WorkspaceType string
 
 const (
-	Mattermost WorkspaceType = 0
+	Mattermost WorkspaceType = "Mattermost"
 )
 
 // TODO end cases
@@ -26,4 +26,3 @@ type Workspace struct {
 	PersonalToken string        `json:"personal_token,omitempty"`
 	Projects      []*Project
 }
-

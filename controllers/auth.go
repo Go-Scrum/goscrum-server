@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"goscrum/server/constants"
 	"os"
-	"strings"
 
 	"goscrum/server/models"
 	"goscrum/server/services"
 	"goscrum/server/util"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/mattermost/mattermost-server/v5/model"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/oauth2"
 )
@@ -26,11 +27,6 @@ func NewAuthController(workspaceService services.WorkspaceService) AuthControlle
 }
 
 func (a *AuthController) getMatterMostOAuthClient(workspace models.Workspace) *oauth2.Config {
-	for _, e := range os.Environ() {
-		pair := strings.SplitN(e, "=", 2)
-		fmt.Println(pair[0])
-		fmt.Println(pair[1])
-	}
 	// TODO -- remove extra slash at the end of workspace URL when creating workspace
 	fmt.Println(fmt.Sprintf("%s/oauth/mattermost/callback", os.Getenv(constants.ApiUrl)))
 	conf := &oauth2.Config{
@@ -71,8 +67,8 @@ func (a *AuthController) MattermostLogin(req events.APIGatewayProxyRequest) (eve
 func (a *AuthController) MattermostOauth(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	//Use the authorization code that is pushed to the redirect
 	//URL. Exchange will do the handshake to retrieve the
-	//initial access token. The HTTP Client returned by
-	//conf.Client will refresh the token as necessary.
+	//initial access token. The HTTP mattermostClient returned by
+	//conf.mattermostClient will refresh the token as necessary.
 	code, err := util.GetStringKey(request.QueryStringParameters, "code")
 
 	if err != nil {
@@ -107,6 +103,44 @@ func (a *AuthController) MattermostOauth(request events.APIGatewayProxyRequest) 
 	// TODO for now, show error message, later redirect to beautiful page.
 	if err != nil {
 		return util.ServerError(err)
+	}
+
+	mattermostClient := model.NewAPIv4Client(workspace.URL)
+	mattermostClient.SetOAuthToken(workspace.AccessToken)
+
+	_, res := mattermostClient.InstallPluginFromUrl(os.Getenv(constants.MattermostPluginUrl), true)
+	if res != nil && res.StatusCode != 201 {
+		return util.ServerError(res.Error)
+	}
+
+	config, res := mattermostClient.GetConfig()
+	spew.Dump(res)
+	if res != nil && res.StatusCode != 200 {
+		return util.ServerError(res.Error)
+	}
+
+	fmt.Println("Getting configuration")
+
+	if config != nil {
+		config.PluginSettings.Plugins[constants.MattermostPluginId]["url"] = os.Getenv(constants.ApiUrl)
+		config.PluginSettings.Plugins[constants.MattermostPluginId]["token"] = workspace.PersonalToken
+
+		_, res = mattermostClient.UpdateConfig(config)
+
+		if res != nil && res.StatusCode != 200 {
+			return util.ServerError(res.Error)
+		}
+
+		fmt.Println("Updating configuration")
+
+		_, res = mattermostClient.EnablePlugin(constants.MattermostPluginId)
+
+		if res != nil && res.StatusCode != 200 {
+			return util.ServerError(res.Error)
+		}
+		fmt.Println("Enabled plugin ")
+	} else {
+		// TODO throw error
 	}
 
 	// TODO redirect to application workspace page with hash access token

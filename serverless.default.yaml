@@ -32,6 +32,7 @@ provider:
     DATABASE_PASSWORD: ${env:DATABASE_PASSWORD}
     DATABASE_PORT: ${env:DATABASE_PORT}
     API_URL: ${file(./serverless.${self:custom.stage}.yaml):API_URL}
+    MATTERMOST_PLUGIN_URL: ${file(./serverless.${self:custom.stage}.yaml):MATTERMOST_PLUGIN_URL}
 
 functions:
   migrate:
