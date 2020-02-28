@@ -15,6 +15,7 @@ require (
 	github.com/rs/zerolog v1.17.2 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/smartystreets/goconvey v1.6.4
+	github.com/xanzy/go-gitlab v0.27.0
 	go.uber.org/zap v1.13.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 )

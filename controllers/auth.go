@@ -7,7 +7,6 @@ import (
 	"goscrum/server/constants"
 	"os"
 
-	"goscrum/server/models"
 	"goscrum/server/services"
 	"goscrum/server/util"
 
@@ -26,20 +25,11 @@ func NewAuthController(workspaceService services.WorkspaceService) AuthControlle
 	return AuthController{workspaceService: workspaceService}
 }
 
-func (a *AuthController) getMatterMostOAuthClient(workspace models.Workspace) *oauth2.Config {
-	// TODO -- remove extra slash at the end of workspace URL when creating workspace
-	fmt.Println(fmt.Sprintf("%s/oauth/mattermost/callback", os.Getenv(constants.ApiUrl)))
-	conf := &oauth2.Config{
-		ClientID:     workspace.ClientID,
-		ClientSecret: workspace.ClientSecret,
-		Endpoint: oauth2.Endpoint{
-			TokenURL: fmt.Sprintf("%s/oauth/access_token", workspace.URL),
-			AuthURL:  fmt.Sprintf("%s/oauth/authorize", workspace.URL),
-		},
-		RedirectURL: fmt.Sprintf("%s/oauth/mattermost/callback", os.Getenv(constants.ApiUrl)),
-	}
-	return conf
-}
+const (
+	botUsername    = "goscrum"
+	botDisplayName = "GoScrum Bot"
+	botDescription = "A bot account created by the GoScrum plugin."
+)
 
 func (a *AuthController) MattermostLogin(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	workspaceId, err := util.GetStringKey(req.PathParameters, "workspaceId")
@@ -54,7 +44,7 @@ func (a *AuthController) MattermostLogin(req events.APIGatewayProxyRequest) (eve
 	}
 
 	// TODO -- remove extra slash at the end of workspace URL when creating workspace
-	conf := a.getMatterMostOAuthClient(workspace)
+	conf := util.GetMatterMostOAuthClient(workspace)
 
 	// Redirect user to consent page to ask for permission
 	// for the scopes specified above.
@@ -84,7 +74,7 @@ func (a *AuthController) MattermostOauth(request events.APIGatewayProxyRequest) 
 		return util.ServerError(err)
 	}
 
-	conf := a.getMatterMostOAuthClient(workspace)
+	conf := util.GetMatterMostOAuthClient(workspace)
 	ctx := context.Background()
 
 	tok, err := conf.Exchange(ctx, code, oauth2.AccessTypeOffline)
@@ -139,10 +129,42 @@ func (a *AuthController) MattermostOauth(request events.APIGatewayProxyRequest) 
 			return util.ServerError(res.Error)
 		}
 		fmt.Println("Enabled plugin ")
+
+		botUserId := ""
+		bot, res := mattermostClient.GetUserByUsername(botUsername, "")
+		if res != nil && res.StatusCode != 200 {
+			fmt.Println(res.Error.Message)
+		}
+		if bot == nil {
+			systemBot := &model.Bot{
+				Username:    botUsername,
+				DisplayName: botDisplayName,
+				Description: botDescription,
+			}
+			newBot, res := mattermostClient.CreateBot(systemBot)
+			if res != nil && res.StatusCode != 201 {
+				// TODO -- write error message
+				fmt.Println(res.Error.Message)
+			}
+			botUserId = newBot.UserId
+		} else {
+			botUserId = bot.Id
+		}
+
+		workspace.BotUserID = botUserId
+		_, err = a.workspaceService.Save(workspace)
+		if err != nil {
+			// TODO -- write error message
+			fmt.Println(err.Error())
+		}
+		_, err = a.workspaceService.Save(workspace)
+		if err != nil {
+			// TODO -- write error message
+			fmt.Println(err.Error())
+		}
 	} else {
 		// TODO throw error
 	}
 
-	// TODO redirect to application workspace page with hash access token
-	return util.Redirect("https://google.com")
+	return util.Redirect(os.Getenv(constants.WebAppUrl))
 }

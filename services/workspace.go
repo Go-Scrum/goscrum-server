@@ -20,7 +20,7 @@ func (service *WorkspaceService) Save(workspace models.Workspace) (models.Worksp
 	//if err != nil {
 	//	return bs, err
 	//}
-	err := service.db.Create(&workspace).Error
+	err := service.db.Save(&workspace).Error
 	return workspace, err
 }
 
