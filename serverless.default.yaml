@@ -72,18 +72,21 @@ functions:
           method: post
           authorizer:
             arn: arn:aws:cognito-idp:ap-south-1:145912607509:userpool/ap-south-1_MzWALNIiB
+          cors: true
 
       - http:
           path: projects
           method: get
           authorizer:
             arn: arn:aws:cognito-idp:ap-south-1:145912607509:userpool/ap-south-1_MzWALNIiB
+          cors: true
 
       - http:
           path: projects/{id}
           method: get
           authorizer:
             arn: arn:aws:cognito-idp:ap-south-1:145912607509:userpool/ap-south-1_MzWALNIiB
+          cors: true
 
   oauth:
     handler: bin/oauth
