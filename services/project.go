@@ -34,14 +34,14 @@ func (service *ProjectService) Save(project models.Project) (models.Project, err
 			}
 		}
 	}
-	err := service.db.Create(&project).Error
+	err := service.db.Save(&project).Error
 	return project, err
 }
 
-func (service *ProjectService) GetAll() ([]models.Project, error) {
+func (service *ProjectService) GetAll(workspaceId string) ([]models.Project, error) {
 	var projects []models.Project
 
-	if err := service.db.Find(&projects).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := service.db.Where("workspace_id = ?", workspaceId).Find(&projects).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return projects, err
 	}
 

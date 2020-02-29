@@ -2,32 +2,51 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/aws/aws-lambda-go/events"
-	jsoniter "github.com/json-iterator/go"
 	"goscrum/server/models"
 	"goscrum/server/services"
 	"goscrum/server/util"
 	"net/http"
+	"os"
+
+	"github.com/aws/aws-lambda-go/events"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type ProjectController struct {
-	service services.ProjectService
+	projectService   services.ProjectService
+	workspaceService services.WorkspaceService
 }
 
-func NewProjectController(service services.ProjectService) ProjectController {
-	return ProjectController{service: service}
+func NewProjectController(projectService services.ProjectService, workspaceService services.WorkspaceService) ProjectController {
+	return ProjectController{projectService: projectService, workspaceService: workspaceService}
 }
 
 func (p *ProjectController) Save(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	project := models.Project{}
 
-	err := json.Unmarshal([]byte(req.Body), &project)
+	email := getEmailFromClaim(req)
+	if os.Getenv("LOCAL") == "true" {
+		email = "durgaprasad.budhwani@gmail.com"
+	}
+
+	if email == "" {
+		return util.ClientError(http.StatusUnauthorized)
+	}
+
+	workspace, err := p.workspaceService.GetWorkspaceByUserEmail(email)
+	if err != nil {
+		return util.ResponseError(http.StatusInternalServerError, err.Error())
+	}
+	project := models.Project{
+		WorkspaceID: workspace.ID,
+	}
+
+	err = json.Unmarshal([]byte(req.Body), &project)
 	if err != nil {
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}
 
-	project, err = p.service.Save(project)
+	project, err = p.projectService.Save(project)
 	if err != nil {
 		return util.ResponseError(http.StatusInternalServerError, err.Error())
 	}
@@ -41,8 +60,21 @@ func (p *ProjectController) Save(req events.APIGatewayProxyRequest) (events.APIG
 func (p *ProjectController) GetAll(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
+	email := getEmailFromClaim(req)
+	if os.Getenv("LOCAL") == "true" {
+		email = "durgaprasad.budhwani@gmail.com"
+	}
+
+	if email == "" {
+		return util.ClientError(http.StatusUnauthorized)
+	}
+
+	workspace, err := p.workspaceService.GetWorkspaceByUserEmail(email)
+	if err != nil {
+		return util.ResponseError(http.StatusInternalServerError, err.Error())
+	}
 	fmt.Println("Get all")
-	projects, err := p.service.GetAll()
+	projects, err := p.projectService.GetAll(workspace.ID)
 	if err != nil {
 		return util.ResponseError(http.StatusInternalServerError, err.Error())
 	}
@@ -56,6 +88,7 @@ func (p *ProjectController) GetAll(req events.APIGatewayProxyRequest) (events.AP
 }
 
 func (p *ProjectController) GetById(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// TODO -- check for user authentication using claims
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 	id, err := util.GetStringKey(req.PathParameters, "id")
@@ -63,7 +96,7 @@ func (p *ProjectController) GetById(req events.APIGatewayProxyRequest) (events.A
 		return util.ServerError(err)
 	}
 
-	project, err := p.service.GetByID(id)
+	project, err := p.projectService.GetByID(id)
 	if err != nil {
 		return util.ResponseError(http.StatusInternalServerError, err.Error())
 	}
@@ -84,7 +117,7 @@ func (p *ProjectController) GetParticipantQuestion(req events.APIGatewayProxyReq
 		return util.ServerError(err)
 	}
 
-	project, err := p.service.GetByID(id)
+	project, err := p.projectService.GetByID(id)
 	if err != nil {
 		return util.ResponseError(http.StatusInternalServerError, err.Error())
 	}

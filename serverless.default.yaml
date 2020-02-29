@@ -43,8 +43,8 @@ functions:
 
   bot:
     handler: bin/bot
-    events:
-      - schedule: rate(1 minute)
+#    events:
+#      - schedule: rate(1 minute)
 
   workspace:
     handler: bin/workspace
@@ -72,6 +72,12 @@ functions:
 
       - http:
           path: projects
+          method: get
+          authorizer:
+            arn: arn:aws:cognito-idp:ap-south-1:145912607509:userpool/ap-south-1_MzWALNIiB
+
+      - http:
+          path: projects/{id}
           method: get
           authorizer:
             arn: arn:aws:cognito-idp:ap-south-1:145912607509:userpool/ap-south-1_MzWALNIiB

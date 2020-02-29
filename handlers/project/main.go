@@ -16,9 +16,10 @@ func main() {
 
 	defer db.Close()
 
-	service := services.NewProjectService(db)
+	projectService := services.NewProjectService(db)
+	workspaceService := services.NewWorkspaceService(db)
 
-	controller := controllers.NewProjectController(service)
+	controller := controllers.NewProjectController(projectService, workspaceService)
 	router := gateway.NewAPIRouter()
 
 	router.Post("/projects", controller.Save)

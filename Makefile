@@ -17,10 +17,14 @@ run:
 run-local-server:
 	# run sam server locally
 	#sam local start-api
-	sls offline --useDocker --host $(DATABASE_HOSTNAME)
+	sls offline start --useDocker --host $(DATABASE_HOSTNAME)
 
 migrate-local:
 	sls invoke local -f migrate --stage dev
+
+
+run-bot-local:
+	sls invoke local -f bot --stage dev
 
 run-local-db:
 	# run database locally
