@@ -27,7 +27,12 @@ func (m *MattermostController) GetChannels(req events.APIGatewayProxyRequest) (e
 		return util.ServerError(err)
 	}
 
-	channels, err := m.service.GetAllPublicChannels(workspaceId)
+	teamId, err := util.GetStringKey(req.PathParameters, "teamId")
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	channels, err := m.service.GetPublicChannelsForTeam(workspaceId, teamId)
 	if err != nil {
 		return util.ServerError(err)
 	}

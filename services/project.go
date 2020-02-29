@@ -17,7 +17,24 @@ func NewProjectService(db *gorm.DB) ProjectService {
 }
 
 func (service *ProjectService) Save(project models.Project) (models.Project, error) {
-	err := service.db.Save(&project).Error
+	// TODO get list of participants by user_Id
+	//  merge with projects
+
+	var participants []models.Participant
+	var userIds []string
+	for _, participant := range project.Participants {
+		userIds = append(userIds, participant.UserID)
+	}
+	service.db.Where("user_id in (?)", userIds).Find(&participants)
+	for i, user := range project.Participants {
+		for _, participant := range participants {
+			if user.UserID == participant.UserID {
+				project.Participants[i] = &participant
+				break
+			}
+		}
+	}
+	err := service.db.Create(&project).Error
 	return project, err
 }
 

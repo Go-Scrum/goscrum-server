@@ -16,7 +16,7 @@ func NewMattermostService(workspaceService WorkspaceService, projectService Proj
 	return MattermostService{workspaceService: workspaceService, projectService: projectService}
 }
 
-func (m *MattermostService) GetAllPublicChannels(workspaceId string) ([]models.Channel, error) {
+func (m *MattermostService) GetPublicChannelsForTeam(workspaceId, teamId string) ([]models.Channel, error) {
 	workspace, err := m.workspaceService.GetWorkspace(workspaceId)
 	var channels []models.Channel
 
@@ -27,10 +27,10 @@ func (m *MattermostService) GetAllPublicChannels(workspaceId string) ([]models.C
 	apiClient.SetOAuthToken(workspace.AccessToken)
 
 	// TODO -- need to work on pagination
-	mattermostChannels, _, res := apiClient.GetAllChannelsWithCount(0, 100, "")
+	mattermostChannels, res := apiClient.GetPublicChannelsForTeam(teamId, 0, 100, "")
 
 	if res.StatusCode == 200 {
-		for _, ch := range *mattermostChannels {
+		for _, ch := range mattermostChannels {
 			channels = append(channels, models.Channel{
 				Id:          ch.Id,
 				TeamId:      ch.TeamId,

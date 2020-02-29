@@ -19,8 +19,8 @@ func main() {
 	controller := controllers.NewMattermostController(service)
 	router := gateway.NewAPIRouter()
 
-	router.Get("/mattermost/{workspaceId}/channels", controller.GetChannels)
 	router.Get("/mattermost/{workspaceId}/teams", controller.GetTeams)
+	router.Get("/mattermost/{workspaceId}/{teamId}/channels", controller.GetChannels)
 	router.Get("/mattermost/{workspaceId}/{channelId}/participants", controller.GetParticipants)
 	router.Get("/mattermost/bot", controller.GetWorkspaceByBot)
 	router.Get("/mattermost/bot/{projectId}/{participantId}/question", controller.GetParticipantQuestion)

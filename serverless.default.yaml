@@ -98,7 +98,7 @@ functions:
     handler: bin/mattermost
     events:
       - http:
-          path: mattermost/{workspaceId}/channels
+          path: mattermost/{workspaceId}/teams
           method: get
           request:
             parameters:
@@ -106,7 +106,7 @@ functions:
                 workspaceId: true
 
       - http:
-          path: mattermost/{workspaceId}/teams
+          path: mattermost/{workspaceId}/{teamId}/channels
           method: get
           request:
             parameters:
