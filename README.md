@@ -22,7 +22,8 @@ export DATABASE_HOSTNAME=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{
 export DATABASE_NAME='goscrum'
 export DATABASE_USERNAME='goscrum'
 export DATABASE_PASSWORD='goscrum'
-export DATABASE_PORT='3306'
+export DATABASE_PORT='3307'
+export GITLAB_ACCESS_TOKEN='Access - token'
 
 make run -j
 ```

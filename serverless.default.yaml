@@ -36,6 +36,7 @@ provider:
     WEB_APP_URL: ${file(./serverless.${self:custom.stage}.yaml):WEB_APP_URL}
     MATTERMOST_PLUGIN_URL: ${file(./serverless.${self:custom.stage}.yaml):MATTERMOST_PLUGIN_URL}
     LOCAL: ${file(./serverless.${self:custom.stage}.yaml):LOCAL}
+    GITLAB_ACCESS_TOKEN: ${env:GITLAB_ACCESS_TOKEN}
 
 functions:
   migrate:
@@ -173,3 +174,11 @@ functions:
       - http:
           path: gitlab/projects
           method: get
+
+      - http:
+          path: gitlab/{projectId}/events
+          method: get
+          request:
+            parameters:
+              pathParameters:
+                userId: true
