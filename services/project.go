@@ -51,7 +51,10 @@ func (service *ProjectService) GetAll(workspaceId string) ([]models.Project, err
 func (service *ProjectService) GetByID(id string) (models.Project, error) {
 	var project models.Project
 
-	err := service.db.Where("id = ?", id).First(&project).Error
+	err := service.db.
+		Preload("Questions").
+		Preload("Participants").
+		Where("id = ?", id).First(&project).Error
 
 	return project, err
 }

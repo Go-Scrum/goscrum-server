@@ -55,12 +55,14 @@ functions:
           method: post
           authorizer:
             arn: arn:aws:cognito-idp:ap-south-1:145912607509:userpool/ap-south-1_MzWALNIiB
+          cors: true
 
       - http:
           path: workspace
           method: get
           authorizer:
             arn: arn:aws:cognito-idp:ap-south-1:145912607509:userpool/ap-south-1_MzWALNIiB
+          cors: true
 
   project:
     handler: bin/project
@@ -121,7 +123,7 @@ functions:
                 workspaceId: true
 
       - http:
-          path: mattermost/{workspaceId}/{channelId}/participants
+          path: mattermost/{workspaceId}/channel/{channelId}/participants
           method: get
           request:
             parameters:

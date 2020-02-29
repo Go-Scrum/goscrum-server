@@ -25,7 +25,6 @@ func NewWorkspaceController(service services.WorkspaceService) WorkspaceControll
 
 func (a *WorkspaceController) Save(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-
 	email := getEmailFromClaim(req)
 	if os.Getenv("LOCAL") == "true" {
 		email = "durgaprasad.budhwani@gmail.com"
