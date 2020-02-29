@@ -2,13 +2,16 @@ package services
 
 import (
 	"github.com/xanzy/go-gitlab"
+	"goscrum/server/constants"
 	"goscrum/server/models"
+	"os"
+	"time"
 )
 
 type GitlabClient struct{}
 
 func (GitlabClient) Client() *gitlab.Client {
-	return gitlab.NewClient(nil, "<private-token>")
+	return gitlab.NewClient(nil, os.Getenv(constants.GitlabAccessToken))
 }
 
 type GitlabService struct {
@@ -47,4 +50,16 @@ func (service GitlabService) Projects(search string) ([]*gitlab.Project, error) 
 		Visibility: gitlab.Visibility(gitlab.PrivateVisibility),
 	})
 	return projects, err
+}
+
+func (service GitlabService) UserContributions(userId, action string, after time.Time) ([]*gitlab.ContributionEvent, error) {
+	var isoTime gitlab.ISOTime
+	isoTime = gitlab.ISOTime(after)
+	var eventAction gitlab.EventTypeValue
+	eventAction = gitlab.EventTypeValue(action)
+	events, _, err := service.client.Client().Users.ListUserContributionEvents(userId, &gitlab.ListContributionEventsOptions{
+		Action: &eventAction,
+		After:  &isoTime,
+	})
+	return events, err
 }

@@ -11,6 +11,7 @@ const (
 	MattermostPluginUrl = "MATTERMOST_PLUGIN_URL"
 	MattermostPluginId  = "io.goscrum.mattermost-bot"
 	WebAppUrl           = "WEB_APP_URL"
+	GitlabAccessToken   = "GITLAB_ACCESS_TOKEN"
 
 	// Messages
 	BadRequest = "Input field is not valid"

@@ -17,6 +17,7 @@ func main() {
 	router.Post("/gitlab/issues", controller.Issues)
 	router.Get("/gitlab/users", controller.Users)
 	router.Get("/gitlab/projects", controller.Projects)
+	router.Get("/gitlab/{userId}/events", controller.UserEvents)
 
 	apiGateway := gateway.NewGateway()
 	apiGateway.StartAPI(router)

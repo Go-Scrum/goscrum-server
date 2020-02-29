@@ -100,3 +100,29 @@ func (g *GitlabController) Projects(req events.APIGatewayProxyRequest) (events.A
 
 	return util.Success(string(resp))
 }
+
+func (g *GitlabController) UserEvents(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	action, err := util.GetStringKey(req.QueryStringParameters, "action")
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	userId, err := util.GetStringKey(req.PathParameters, "userId")
+	if err != nil {
+		return util.ServerError(err)
+	}
+
+	users, err := g.gitlab.UserContributions(userId, action, time.Now().AddDate(0, 0, -1))
+	if err != nil {
+		return util.ResponseError(http.StatusInternalServerError, err.Error())
+	}
+
+	resp, err := json.Marshal(users)
+	if err != nil {
+		return util.ResponseError(http.StatusInternalServerError, err.Error())
+	}
+
+	return util.Success(string(resp))
+}
