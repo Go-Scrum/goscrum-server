@@ -46,6 +46,13 @@ func (p *ProjectController) Save(req events.APIGatewayProxyRequest) (events.APIG
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}
 
+	if project.Deadline != "" {
+		reportingTime, err := util.CronExpression(project.Deadline)
+		if err != nil {
+			return util.ResponseError(http.StatusInternalServerError, err.Error())
+		}
+		project.ReportingTime = fmt.Sprintf("DR=1;%s", reportingTime)
+	}
 	project, err = p.projectService.Save(project)
 	if err != nil {
 		return util.ResponseError(http.StatusInternalServerError, err.Error())
