@@ -14,7 +14,13 @@ func HandleRequest(_ context.Context) {
 	db := db.DbClient(true)
 	defer db.Close()
 
-	err := db.AutoMigrate(&models.Project{}, &models.Participant{}, &models.Question{}, &models.Workspace{}, &models.Answer{}).Error
+	err := db.AutoMigrate(
+		models.Project{},
+		&models.Participant{},
+		&models.Question{},
+		&models.Workspace{},
+		&models.UserActivity{},
+		&models.Answer{}).Error
 
 	if err != nil {
 		panic(err)

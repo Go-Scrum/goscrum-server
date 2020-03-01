@@ -2,7 +2,6 @@ package services
 
 import (
 	"goscrum/server/models"
-	"strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -59,6 +58,15 @@ func (service *ProjectService) GetByID(id string) (models.Project, error) {
 	return project, err
 }
 
+func (service *ProjectService) GetProjectById(id string) (models.Project, error) {
+	var project models.Project
+
+	err := service.db.
+		Where("id = ?", id).First(&project).Error
+
+	return project, err
+}
+
 func (service *ProjectService) UpdateAnswerPostId(answer models.Answer) error {
 	existingAnswer := models.Answer{}
 	today := time.Now()
@@ -79,133 +87,195 @@ func (service *ProjectService) UpdateAnswerPostId(answer models.Answer) error {
 	return service.db.Save(&existingAnswer).Error
 }
 
-func (service *ProjectService) UserInteraction(userId string, message models.Message) (*models.Message, error) {
-	// TODO - need to check for workspace project name too here for extra validation
-	participant := models.Participant{}
+func (service *ProjectService) AddUserAnswer(answer models.Answer) (models.Answer, error) {
+	err := service.db.Create(&answer).Error
+	return answer, err
+}
+
+func (service *ProjectService) GetProjectQuestions(projectId string) ([]models.Question, error) {
+	var questions []models.Question
 	err := service.db.
-		Where("user_id = ?", userId).
-		First(&participant).Error
+		Where("project_id = ?", projectId).
+		Order("sequence asc").
+		Find(&questions).Error
+	return questions, err
+}
 
-	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		return nil, err
-	}
-
-	if gorm.IsRecordNotFoundError(err) {
-		// TODO -- send message to asked for admin to configure for your channels
-		return nil, err
-	}
-
-	if strings.ToLower(message.Content) == "cancel" || strings.ToLower(message.Content) == "cancelled" {
-		// TODO -cancel standup
-	}
-
-	existingAnswer := models.Answer{}
-	today := time.Now()
-	yesterday := today.AddDate(0, 0, -1)
-	err = service.db.
+func (service *ProjectService) GetParticipantsAnswer(answerIds []string) ([]models.Answer, error) {
+	var answers []models.Answer
+	err := service.db.
 		Preload("Question").
-		Where("participant_id = ? AND updated_at BETWEEN ? AND ?",
-			participant.ID,
-			yesterday,
-			today,
-		).
-		Order("updated_at desc").
-		First(&existingAnswer).Error
-
-	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		return nil, err
-	}
-	if gorm.IsRecordNotFoundError(err) {
-		// TODO need to check when record not found
-		return nil, nil
-	}
-	existingAnswer.Comment = message.Content
-	existingAnswer.ParticipantID = participant.ID
-	err = service.db.Save(&existingAnswer).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	var questions []models.Question
-	err = service.db.Where("project_id = ?", existingAnswer.Question.ProjectId).Find(&questions).Error
-	if err != nil {
-		return nil, err
-	}
-
-	var questionIDs []string
-	for _, question := range questions {
-		questionIDs = append(questionIDs, question.ID)
-	}
-
-	today = time.Now()
-	yesterday = today.AddDate(0, 0, -1)
-	var answers []models.Answer
-	err = service.db.Where("question_id in (?) AND participant_id = ? AND updated_at BETWEEN ? AND ?",
-		questionIDs,
-		participant.ID,
-		yesterday,
-		today,
-	).Find(&answers).Error
-	if err != nil {
-		return nil, err
-	}
-
-	question := models.Question{}
-	for _, ques := range questions {
-		if !isAnswered(answers, ques) {
-			question = ques
-			break
-		}
-	}
-	if question.Title == "" {
-		// TODO -- all questions are done - send completion message
-		return nil, nil
-	}
-	return &models.Message{
-		Content:       question.Title,
-		UserId:        userId,
-		MessageType:   models.QuestionMessage,
-		ParticipantID: participant.ID,
-		Question:      question,
-	}, nil
+		Order("created_at asc").
+		Where("id in (?)", answerIds).
+		Find(&answers).Error
+	return answers, err
 }
 
-func (service *ProjectService) GetParticipantQuestion(projectId, participantId string) (*models.Question, error) {
-	var questions []models.Question
+//
+//func (service *ProjectService) UserInteraction(userId string, message models.Message, workspace models.Workspace) (*models.Message, error) {
+//	participant := models.Participant{}
+//	err := service.db.
+//		Where("user_id = ?", userId).
+//		First(&participant).Error
+//
+//	if err != nil && !gorm.IsRecordNotFoundError(err) {
+//		// TODO- send message that user is not configured for goscrum.io
+//		return nil, err
+//	}
+//	activity, err := UserActivityService{}
+//	// TODO -- get user last activities group
+//
+//	// TODO if last activity type = question then consider this as answer
+//
+//	// TODO if last activity type = report then ask for restart question
+//
+//	// TODO - need to check for workspace project name too here for extra validation
+//	participant := models.Participant{}
+//	err := service.db.
+//		Where("user_id = ?", userId).
+//		First(&participant).Error
+//
+//	if err != nil && !gorm.IsRecordNotFoundError(err) {
+//		return nil, err
+//	}
+//
+//	if gorm.IsRecordNotFoundError(err) {
+//		// TODO -- send message to asked for admin to configure for your channels
+//		return nil, err
+//	}
+//
+//	if strings.ToLower(message.Content) == "cancel" || strings.ToLower(message.Content) == "cancelled" {
+//		// TODO -cancel standup
+//	}
+//
+//	existingAnswer := models.Answer{}
+//	today := time.Now()
+//	yesterday := today.AddDate(0, 0, -1)
+//	err = service.db.
+//		Preload("Question").
+//		Where("participant_id = ? AND updated_at BETWEEN ? AND ?",
+//			participant.ID,
+//			yesterday,
+//			today,
+//		).
+//		Order("updated_at desc").
+//		First(&existingAnswer).Error
+//
+//	if err != nil && !gorm.IsRecordNotFoundError(err) {
+//		return nil, err
+//	}
+//	if gorm.IsRecordNotFoundError(err) {
+//		// TODO need to check when record not found
+//		return nil, nil
+//	}
+//	existingAnswer.Comment = message.Content
+//	existingAnswer.ParticipantID = participant.ID
+//	err = service.db.Save(&existingAnswer).Error
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	var questions []models.Question
+//	err = service.db.Where("project_id = ?", existingAnswer.Question.ProjectId).Find(&questions).Error
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	var questionIDs []string
+//	for _, question := range questions {
+//		questionIDs = append(questionIDs, question.ID)
+//	}
+//
+//	today = time.Now()
+//	yesterday = today.AddDate(0, 0, -1)
+//	var answers []models.Answer
+//	err = service.db.Where("question_id in (?) AND participant_id = ? AND updated_at BETWEEN ? AND ?",
+//		questionIDs,
+//		participant.ID,
+//		yesterday,
+//		today,
+//	).Find(&answers).Error
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	question := models.Question{}
+//	for _, ques := range questions {
+//		if !isAnswered(answers, ques) {
+//			question = ques
+//			break
+//		}
+//	}
+//	if question.Title == "" {
+//		var project models.Project
+//		err = service.db.Where("id = ?", existingAnswer.Question.ProjectId).First(&project).Error
+//		if err != nil {
+//			return nil, err
+//		}
+//		var attachments []*model.SlackAttachment
+//		for _, answer := range answers {
+//			attachments = append(attachments, &model.SlackAttachment{
+//				Color:   "#FF0000",
+//				Pretext: answer.Comment,
+//				Title:   answer.Question.Title,
+//			})
+//		}
+//
+//		return &models.Message{
+//			Attachments:   attachments,
+//			Content:       question.Title,
+//			UserId:        userId,
+//			MessageType:   models.StandupMessage,
+//			ParticipantID: participant.ID,
+//			ChannelId:     project.ChannelID,
+//		}, nil
+//	}
+//
+//	return &models.Message{
+//		Content:       question.Title,
+//		UserId:        userId,
+//		MessageType:   models.QuestionMessage,
+//		ParticipantID: participant.ID,
+//		Question:      question,
+//	}, nil
+//}
 
-	err := service.db.Where("project_id = ?", projectId).Find(&questions).Error
-	if err != nil {
-		return nil, err
-	}
-
-	var questionIDs []string
-	for _, question := range questions {
-		questionIDs = append(questionIDs, question.ID)
-	}
-
-	var answers []models.Answer
-	today := time.Now()
-	yesterday := today.AddDate(0, 0, -1)
-	err = service.db.Where("question_id in (?) AND participant_id = ? AND updated_at BETWEEN ? AND ?",
-		questionIDs,
-		participantId,
-		yesterday,
-		today,
-	).Find(&answers).Error
-	if err != nil {
-		return nil, err
-	}
-
-	question := models.Question{}
-	for _, ques := range questions {
-		if !isAnswered(answers, ques) {
-			question = ques
-			break
-		}
-	}
-	return &question, nil
-}
+//func (service *ProjectService) GetParticipantQuestion(projectId, participantId string) (*models.Question, error) {
+//	var questions []models.Question
+//
+//	err := service.db.Where("project_id = ?", projectId).Find(&questions).Error
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	var questionIDs []string
+//	for _, question := range questions {
+//		questionIDs = append(questionIDs, question.ID)
+//	}
+//
+//	var answers []models.Answer
+//	today := time.Now()
+//	yesterday := today.AddDate(0, 0, -1)
+//	err = service.db.Where("question_id in (?) AND participant_id = ? AND updated_at BETWEEN ? AND ?",
+//		questionIDs,
+//		participantId,
+//		yesterday,
+//		today,
+//	).Find(&answers).Error
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	question := models.Question{}
+//	for _, ques := range questions {
+//		if !isAnswered(answers, ques) {
+//			question = ques
+//			break
+//		}
+//	}
+//	return &question, nil
+//}
 
 func (service *ProjectService) GetQuestionDetails(questionId string) (*models.Question, error) {
 	question := models.Question{}
@@ -223,11 +293,11 @@ func (service *ProjectService) UpdateParticipant(participant models.Participant)
 	return service.db.Save(&participant).Error
 }
 
-func isAnswered(answers []models.Answer, question models.Question) bool {
-	for _, answer := range answers {
-		if answer.QuestionID == question.ID {
-			return true
-		}
-	}
-	return false
-}
+//func isAnswered(answers []models.Answer, question models.Question) bool {
+//	for _, answer := range answers {
+//		if answer.QuestionID == question.ID {
+//			return true
+//		}
+//	}
+//	return false
+//}

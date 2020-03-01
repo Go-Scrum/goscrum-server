@@ -130,38 +130,39 @@ func (a *AuthController) MattermostOauth(request events.APIGatewayProxyRequest) 
 		}
 		fmt.Println("Enabled plugin ")
 
-		botUserId := ""
-		bot, res := mattermostClient.GetUserByUsername(botUsername, "")
-		if res != nil && res.StatusCode != 200 {
-			fmt.Println(res.Error.Message)
-		}
-		if bot == nil {
-			systemBot := &model.Bot{
-				Username:    botUsername,
-				DisplayName: botDisplayName,
-				Description: botDescription,
-			}
-			newBot, res := mattermostClient.CreateBot(systemBot)
-			if res != nil && res.StatusCode != 201 {
-				// TODO -- write error message
-				fmt.Println(res.Error.Message)
-			}
-			botUserId = newBot.UserId
-		} else {
-			botUserId = bot.Id
-		}
-
-		workspace.BotUserID = botUserId
-		_, err = a.workspaceService.Save(workspace)
-		if err != nil {
-			// TODO -- write error message
-			fmt.Println(err.Error())
-		}
-		_, err = a.workspaceService.Save(workspace)
-		if err != nil {
-			// TODO -- write error message
-			fmt.Println(err.Error())
-		}
+		//botUserId := ""
+		//bot, res := mattermostClient.GetUserByUsername(botUsername, "")
+		////if res != nil && res.StatusCode != 200 {
+		////	fmt.Println(res.Error.Message)
+		////}
+		////if bot == nil {
+		////	systemBot := &model.Bot{
+		////		Username:    botUsername,
+		////		DisplayName: botDisplayName,
+		////		Description: botDescription,
+		////	}
+		////	newBot, res := mattermostClient.CreateBot(systemBot)
+		////
+		////	if res != nil && res.StatusCode != 201 {
+		////		// TODO -- write error message
+		////		fmt.Println(res.Error.Message)
+		////	}
+		////	botUserId = newBot.UserId
+		////} else {
+		////	botUserId = bot.Id
+		////}
+		////
+		////workspace.BotUserID = botUserId
+		////_, err = a.workspaceService.Save(workspace)
+		////if err != nil {
+		////	// TODO -- write error message
+		////	fmt.Println(err.Error())
+		////}
+		//_, err = a.workspaceService.Save(workspace)
+		//if err != nil {
+		//	// TODO -- write error message
+		//	fmt.Println(err.Error())
+		//}
 	} else {
 		// TODO throw error
 	}

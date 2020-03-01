@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/davecgh/go-spew/spew"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -120,44 +121,44 @@ func (m *MattermostController) GetWorkspaceByBot(req events.APIGatewayProxyReque
 	return util.Success(result)
 }
 
-func (m *MattermostController) GetParticipantQuestion(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	// TODO Validate with personal token
-	//reqToken, err := util.GetStringKey(req.Headers, "Authorization")
-	//if err != nil {
-	//	return util.ServerError(err)
-	//}
-	//
-	//splitToken := strings.Split(strings.ToLower(reqToken), "bearer")
-	//if len(splitToken) != 2 {
-	//	return util.ClientError(http.StatusUnauthorized)
-	//}
-
-	projectId, err := util.GetStringKey(req.PathParameters, "projectId")
-	if err != nil {
-		return util.ServerError(err)
-	}
-
-	participantId, err := util.GetStringKey(req.PathParameters, "participantId")
-	if err != nil {
-		return util.ServerError(err)
-	}
-
-	//token := strings.TrimSpace(splitToken[1])
-
-	question, err := m.service.GetParticipantQuestion(projectId, participantId)
-	if err != nil {
-		return util.ServerError(err)
-	}
-
-	result, err := json.MarshalToString(question)
-	if err != nil {
-		return util.ResponseError(http.StatusBadRequest, err.Error())
-	}
-
-	return util.Success(result)
-}
+//func (m *MattermostController) GetParticipantQuestion(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+//
+//	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+//	// TODO Validate with personal token
+//	//reqToken, err := util.GetStringKey(req.Headers, "Authorization")
+//	//if err != nil {
+//	//	return util.ServerError(err)
+//	//}
+//	//
+//	//splitToken := strings.Split(strings.ToLower(reqToken), "bearer")
+//	//if len(splitToken) != 2 {
+//	//	return util.ClientError(http.StatusUnauthorized)
+//	//}
+//
+//	projectId, err := util.GetStringKey(req.PathParameters, "projectId")
+//	if err != nil {
+//		return util.ServerError(err)
+//	}
+//
+//	participantId, err := util.GetStringKey(req.PathParameters, "participantId")
+//	if err != nil {
+//		return util.ServerError(err)
+//	}
+//
+//	//token := strings.TrimSpace(splitToken[1])
+//
+//	question, err := m.service.GetParticipantQuestion(projectId, participantId)
+//	if err != nil {
+//		return util.ServerError(err)
+//	}
+//
+//	result, err := json.MarshalToString(question)
+//	if err != nil {
+//		return util.ResponseError(http.StatusBadRequest, err.Error())
+//	}
+//
+//	return util.Success(result)
+//}
 
 func (m *MattermostController) GetQuestionDetails(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
@@ -193,30 +194,17 @@ func (m *MattermostController) GetQuestionDetails(req events.APIGatewayProxyRequ
 	return util.Success(result)
 }
 
-func (m *MattermostController) UpdateAnswerPostId(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (m *MattermostController) AddUserActivity(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	// TODO Validate with personal token
-	//reqToken, err := util.GetStringKey(req.Headers, "Authorization")
-	//if err != nil {
-	//	return util.ServerError(err)
-	//}
-	//
-	//splitToken := strings.Split(strings.ToLower(reqToken), "bearer")
-	//if len(splitToken) != 2 {
-	//	return util.ClientError(http.StatusUnauthorized)
-	//}
+	userActivity := models.UserActivity{}
 
-	//token := strings.TrimSpace(splitToken[1])
-
-	answer := models.Answer{}
-
-	err := json.Unmarshal([]byte(req.Body), &answer)
+	err := json.Unmarshal([]byte(req.Body), &userActivity)
 	if err != nil {
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}
 
-	err = m.service.UpdateAnswerPostId(answer)
+	err = m.service.AddUserActivity(userActivity)
 	if err != nil {
 		return util.ServerError(err)
 	}
@@ -236,7 +224,7 @@ func (m *MattermostController) UserInteraction(req events.APIGatewayProxyRequest
 	//if len(splitToken) != 2 {
 	//	return util.ClientError(http.StatusUnauthorized)
 	//}
-
+	//
 	//token := strings.TrimSpace(splitToken[1])
 
 	userId, err := util.GetStringKey(req.PathParameters, "userId")
@@ -244,14 +232,22 @@ func (m *MattermostController) UserInteraction(req events.APIGatewayProxyRequest
 		return util.ServerError(err)
 	}
 
+	//workspace, err := m.service.GetWorkspaceByToken(token)
+	//if err != nil {
+	//	return util.ServerError(err)
+	//}
+
 	message := models.Message{}
 
 	err = json.Unmarshal([]byte(req.Body), &message)
+	spew.Dump(message)
 	if err != nil {
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}
 
 	newMessage, err := m.service.UserInteraction(userId, message)
+	spew.Dump(newMessage)
+	spew.Dump(err)
 	if err != nil {
 		return util.ServerError(err)
 	}

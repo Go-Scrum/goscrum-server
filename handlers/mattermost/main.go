@@ -14,7 +14,9 @@ func main() {
 
 	workspaceService := services.NewWorkspaceService(db)
 	projectService := services.NewProjectService(db)
-	service := services.NewMattermostService(workspaceService, projectService)
+	userActivityService := services.NewUserActivityService(db)
+	participantService := services.NewParticipantService(db)
+	service := services.NewMattermostService(workspaceService, projectService, userActivityService, participantService)
 
 	controller := controllers.NewMattermostController(service)
 	router := gateway.NewAPIRouter()
@@ -23,9 +25,9 @@ func main() {
 	router.Get("/mattermost/{workspaceId}/{teamId}/channels", controller.GetChannels)
 	router.Get("/mattermost/{workspaceId}/channel/{channelId}/participants", controller.GetParticipants)
 	router.Get("/mattermost/bot", controller.GetWorkspaceByBot)
-	router.Get("/mattermost/bot/{projectId}/{participantId}/question", controller.GetParticipantQuestion)
+	//router.Get("/mattermost/bot/{projectId}/{participantId}/question", controller.GetParticipantQuestion)
 	router.Get("/mattermost/bot/question/{questionId}", controller.GetQuestionDetails)
-	router.Post("/mattermost/bot/answer/post", controller.UpdateAnswerPostId)
+	router.Post("/mattermost/bot/user/activity", controller.AddUserActivity)
 	router.Post("/mattermost/bot/user/{userId}/message", controller.UserInteraction)
 
 	apiGateway := gateway.NewGateway()

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"goscrum/server/models"
 	"net/http"
 
@@ -8,12 +9,24 @@ import (
 )
 
 type MattermostService struct {
-	workspaceService WorkspaceService
-	projectService   ProjectService
+	workspaceService    WorkspaceService
+	projectService      ProjectService
+	userActivityService UserActivityService
+	participantService  ParticipantService
 }
 
-func NewMattermostService(workspaceService WorkspaceService, projectService ProjectService) MattermostService {
-	return MattermostService{workspaceService: workspaceService, projectService: projectService}
+func NewMattermostService(
+	workspaceService WorkspaceService,
+	projectService ProjectService,
+	userActivityService UserActivityService,
+	participantService ParticipantService,
+) MattermostService {
+	return MattermostService{
+		workspaceService:    workspaceService,
+		projectService:      projectService,
+		userActivityService: userActivityService,
+		participantService:  participantService,
+	}
 }
 
 func (m *MattermostService) GetPublicChannelsForTeam(workspaceId, teamId string) ([]models.Channel, error) {
@@ -111,16 +124,183 @@ func (m *MattermostService) GetWorkspaceByToken(token string) (models.Workspace,
 }
 
 //GetWorkspace returns a particular bot
-func (m *MattermostService) GetParticipantQuestion(projectId, participantId string) (*models.Question, error) {
-	return m.projectService.GetParticipantQuestion(projectId, participantId)
-}
+//func (m *MattermostService) GetParticipantQuestion(projectId, participantId string) (*models.Question, error) {
+//	return m.projectService.GetParticipantQuestion(projectId, participantId)
+//}
 
-func (m *MattermostService) UpdateAnswerPostId(answer models.Answer) error {
-	return m.projectService.UpdateAnswerPostId(answer)
+func (m *MattermostService) AddUserActivity(userActivity models.UserActivity) error {
+	return m.userActivityService.Add(userActivity)
 }
 
 func (m *MattermostService) UserInteraction(userId string, message models.Message) (*models.Message, error) {
-	return m.projectService.UserInteraction(userId, message)
+	participant, err := m.participantService.GetParticipantByUserId(userId)
+	if err != nil {
+		return &models.Message{
+			Content:       err.Error(),
+			UserId:        userId,
+			MessageType:   models.QuestionMessage,
+			ParticipantID: participant.ID,
+		}, nil
+	}
+	if participant == nil {
+		// TODO send message participant is not configured
+	}
+
+	userActivity, err := m.userActivityService.GetLastUserActivity(participant.ID)
+	if err != nil {
+		return &models.Message{
+			Content:       err.Error(),
+			UserId:        userId,
+			MessageType:   models.QuestionMessage,
+			ParticipantID: participant.ID,
+		}, nil
+	}
+
+	if userActivity == nil {
+		// TODO -- ask user to start startup
+	}
+
+	if userActivity.ActivityType == models.UserQuestionActivity {
+		savedAnswer, err := m.projectService.AddUserAnswer(models.Answer{
+			ParticipantID: participant.ID,
+			QuestionID:    userActivity.QuestionID,
+			Comment:       message.Content,
+			BotPostId:     "",
+		})
+
+		if err != nil {
+			return &models.Message{
+				Content:       err.Error(),
+				UserId:        userId,
+				MessageType:   models.ErrorMessage,
+				ParticipantID: participant.ID,
+			}, nil
+		}
+
+		err = m.userActivityService.Add(models.UserActivity{
+			UserId:        userId,
+			ChannelID:     userActivity.ChannelID,
+			ProjectID:     userActivity.ProjectID,
+			ParticipantID: participant.ID,
+			QuestionID:    userActivity.QuestionID,
+			AnswerID:      savedAnswer.ID,
+			BotPostId:     "",
+			ActivityType:  models.UserAnswerActivity,
+		})
+
+		if err != nil {
+			return &models.Message{
+				Content:       err.Error(),
+				UserId:        userId,
+				MessageType:   models.ErrorMessage,
+				ParticipantID: participant.ID,
+			}, nil
+		}
+
+		// get list of questions for project
+		questions, err := m.projectService.GetProjectQuestions(userActivity.ProjectID)
+		if err != nil {
+			return &models.Message{
+				Content:       err.Error(),
+				UserId:        userId,
+				MessageType:   models.ErrorMessage,
+				ParticipantID: participant.ID,
+			}, nil
+		}
+
+		userActivities, err := m.userActivityService.GetUserActivities(participant.ID)
+		if err != nil {
+			return &models.Message{
+				Content:       err.Error(),
+				UserId:        userId,
+				MessageType:   models.ErrorMessage,
+				ParticipantID: participant.ID,
+			}, nil
+		}
+		var newQuestion *models.Question
+		for _, question := range questions {
+			if !isAnswered(userActivities, question) {
+				newQuestion = &question
+				break
+			}
+		}
+		if newQuestion != nil {
+			// send next question
+			return &models.Message{
+				Content:       newQuestion.Title,
+				UserId:        userId,
+				MessageType:   models.QuestionMessage,
+				ParticipantID: participant.ID,
+				Question:      *newQuestion,
+			}, nil
+		}
+
+		// sort questions by sequence
+		//sort.Slice(questions, func(i, j int) bool {
+		//	return questions[i].Sequence > questions[j].Sequence
+		//})
+
+		var answerIDs []string
+		for _, question := range questions {
+			for _, activity := range userActivities {
+				if activity.ActivityType == models.UserAnswerActivity &&
+					activity.QuestionID == question.ID {
+					answerIDs = append(answerIDs, activity.AnswerID)
+					break
+				}
+			}
+		}
+		projectAnswers, err := m.projectService.GetParticipantsAnswer(answerIDs)
+		if err != nil {
+			return &models.Message{
+				Content:       err.Error(),
+				UserId:        userId,
+				MessageType:   models.ErrorMessage,
+				ParticipantID: participant.ID,
+			}, nil
+		}
+
+		var attachments []*model.SlackAttachment
+		for _, answer := range projectAnswers {
+			attachments = append(attachments, &model.SlackAttachment{
+				Color: answer.Question.Color,
+				Text:  fmt.Sprintf("%s\r\n%s", answer.Question.Title, answer.Comment),
+			})
+		}
+
+		project, err := m.projectService.GetProjectById(userActivity.ProjectID)
+		if err != nil {
+			return &models.Message{
+				Content:       err.Error(),
+				UserId:        userId,
+				MessageType:   models.ErrorMessage,
+				ParticipantID: participant.ID,
+			}, nil
+		}
+		return &models.Message{
+			Content:       fmt.Sprintf("@%s updates", participant.RealName),
+			Attachments:   attachments,
+			UserId:        userId,
+			MessageType:   models.StandupMessage,
+			ParticipantID: participant.ID,
+			ChannelId:     project.ChannelID,
+		}, nil
+		// TODO -- all questions are anwsered
+	}
+
+	// TODO -- needto check for this condition
+	return nil, nil
+	//return m.projectService.UserInteraction(userId, message, workspace)
+}
+
+func isAnswered(userActivities []models.UserActivity, question models.Question) bool {
+	for _, activity := range userActivities {
+		if activity.ActivityType == models.UserAnswerActivity &&
+			activity.QuestionID == question.ID {
+			return true
+		}
+	}
+	return false
 }
 
 func (m *MattermostService) GetQuestionDetails(questionId string) (*models.Question, error) {

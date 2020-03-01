@@ -12,5 +12,7 @@ type Question struct {
 	Model
 	Title     string
 	Type      QuestionType
+	Color     string
 	ProjectId string
+	Sequence  uint
 }

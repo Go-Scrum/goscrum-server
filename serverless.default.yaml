@@ -105,6 +105,7 @@ functions:
             parameters:
               querystrings:
                 code: true
+          cors: true
 
   mattermost:
     handler: bin/mattermost
@@ -116,6 +117,7 @@ functions:
             parameters:
               pathParameters:
                 workspaceId: true
+          cors: true
 
       - http:
           path: mattermost/{workspaceId}/{teamId}/channels
@@ -124,6 +126,7 @@ functions:
             parameters:
               pathParameters:
                 workspaceId: true
+          cors: true
 
       - http:
           path: mattermost/{workspaceId}/channel/{channelId}/participants
@@ -133,10 +136,12 @@ functions:
               pathParameters:
                 workspaceId: true
                 channelId: true
+          cors: true
 
       - http:
           path: mattermost/bot
           method: get
+          cors: true
 
       - http:
           path: /mattermost/bot/{projectId}/{participantId}/question
@@ -146,6 +151,7 @@ functions:
               pathParameters:
                 projectId: true
                 participantId: true
+          cors: true
 
       - http:
           path: /mattermost/bot/question/{questionId}
@@ -154,14 +160,17 @@ functions:
             parameters:
               pathParameters:
                 questionId: true
+          cors: true
 
       - http:
-          path: /mattermost/bot/answer/post
+          path: /mattermost/bot/user/activity
           method: post
+          cors: true
 
       - http:
           path: /mattermost/bot/user/{userId}/message
           method: post
+          cors: true
 
   gitlab:
     handler: bin/gitlab
@@ -173,18 +182,22 @@ functions:
             parameters:
               pathParameters:
                 projectId: true
+          cors: true
 
       - http:
           path: gitlab/issues
           method: post
+          cors: true
 
       - http:
           path: gitlab/users
           method: get
+          cors: true
 
       - http:
           path: gitlab/projects
           method: get
+          cors: true
 
       - http:
           path: gitlab/{projectId}/events
@@ -193,3 +206,4 @@ functions:
             parameters:
               pathParameters:
                 userId: true
+          cors: true

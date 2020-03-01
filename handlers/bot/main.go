@@ -42,8 +42,7 @@ func HandleRequest(_ context.Context) {
 		// TODO -- put more validation if required
 		if workspace.AccessToken != "" && workspace.Projects != nil || len(workspace.Projects) > 0 {
 			// TODO -- create bot at workspace level VIMP
-			apiClient := model.NewAPIv4Client(workspace.URL)
-			apiClient.SetOAuthToken(workspace.AccessToken)
+
 			//bot, res := apiClient.GetBot(workspace.BotUserID, "")
 			//if res != nil {
 			//	fmt.Println(res.Error.Message))
@@ -68,6 +67,8 @@ func HandleRequest(_ context.Context) {
 			//		continue
 			//	}
 			//}
+			apiClient := model.NewAPIv4Client(workspace.URL)
+			apiClient.SetOAuthToken(workspace.AccessToken)
 
 			for _, project := range workspace.Projects {
 				if cr, err := cronrange.ParseString(project.ReportingTime); err == nil {

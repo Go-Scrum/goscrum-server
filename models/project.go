@@ -15,6 +15,6 @@ type Project struct {
 	ReportingChannel string         `db:"reporting_channel" json:"reporting_channel"`
 	ReportingTime    string         `db:"reporting_time" json:"reporting_time"`
 	IsActive         bool           `db:"is_active" json:"is_active"`
-	TeamID           int            `db:"team_id" json:"team_id"`
+	TeamID           string         `db:"team_id" json:"team_id"`
 	Questions        []Question
 }

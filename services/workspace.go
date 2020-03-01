@@ -100,7 +100,9 @@ func (service *WorkspaceService) GetWorkspaceByToken(token string) (models.Works
 	workspace := models.Workspace{}
 	err := service.db.
 		Preload("Projects.Participants").
-		Preload("Projects.Questions").
+		Preload("Projects.Questions", func(db *gorm.DB) *gorm.DB {
+			return db.Order("questions.sequence ASC")
+		}).
 		Where("personal_token = ?", token).
 		First(&workspace).Error
 
