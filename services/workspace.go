@@ -68,17 +68,17 @@ func (service *WorkspaceService) GetWorkspaceByBotAccessToken(botAccessToken str
 	return workspace, nil
 }
 
-func (service *WorkspaceService) GetWorkspaceByUserEmail(email string) (models.Workspace, error) {
-	workspace := models.Workspace{}
+func (service *WorkspaceService) GetWorkspaceByUserEmail(email string) (*models.Workspace, error) {
+	var workspace models.Workspace
 	err := service.db.
 		Where("user_email = ?", email).
 		First(&workspace).Error
 
-	if err != nil {
-		return workspace, err
+	if err != nil && !gorm.IsRecordNotFoundError(err) {
+		return &workspace, err
 	}
 
-	return workspace, nil
+	return &workspace, nil
 }
 
 //GetWorkspace returns a particular bot
