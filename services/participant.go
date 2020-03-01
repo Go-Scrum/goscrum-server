@@ -17,6 +17,7 @@ func NewParticipantService(db *gorm.DB) ParticipantService {
 func (service *ParticipantService) GetParticipantByUserId(userId string) (*models.Participant, error) {
 	participant := models.Participant{}
 	err := service.db.
+		Preload("Projects").
 		Where("user_id = ?", userId).
 		First(&participant).Error
 

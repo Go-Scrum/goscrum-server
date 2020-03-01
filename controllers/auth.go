@@ -112,6 +112,12 @@ func (a *AuthController) MattermostOauth(request events.APIGatewayProxyRequest) 
 	fmt.Println("Getting configuration")
 
 	if config != nil {
+		if config.PluginSettings.Plugins == nil {
+			config.PluginSettings.Plugins = map[string]map[string]interface{}{}
+		}
+		if config.PluginSettings.Plugins[constants.MattermostPluginId] == nil {
+			config.PluginSettings.Plugins[constants.MattermostPluginId] = map[string]interface{}{}
+		}
 		config.PluginSettings.Plugins[constants.MattermostPluginId]["url"] = os.Getenv(constants.ApiUrl)
 		config.PluginSettings.Plugins[constants.MattermostPluginId]["token"] = workspace.PersonalToken
 

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"goscrum/server/models"
 	"goscrum/server/services"
 	"goscrum/server/util"
@@ -121,44 +122,28 @@ func (m *MattermostController) GetWorkspaceByBot(req events.APIGatewayProxyReque
 	return util.Success(result)
 }
 
-//func (m *MattermostController) GetParticipantQuestion(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-//
-//	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-//	// TODO Validate with personal token
-//	//reqToken, err := util.GetStringKey(req.Headers, "Authorization")
-//	//if err != nil {
-//	//	return util.ServerError(err)
-//	//}
-//	//
-//	//splitToken := strings.Split(strings.ToLower(reqToken), "bearer")
-//	//if len(splitToken) != 2 {
-//	//	return util.ClientError(http.StatusUnauthorized)
-//	//}
-//
-//	projectId, err := util.GetStringKey(req.PathParameters, "projectId")
-//	if err != nil {
-//		return util.ServerError(err)
-//	}
-//
-//	participantId, err := util.GetStringKey(req.PathParameters, "participantId")
-//	if err != nil {
-//		return util.ServerError(err)
-//	}
-//
-//	//token := strings.TrimSpace(splitToken[1])
-//
-//	question, err := m.service.GetParticipantQuestion(projectId, participantId)
-//	if err != nil {
-//		return util.ServerError(err)
-//	}
-//
-//	result, err := json.MarshalToString(question)
-//	if err != nil {
-//		return util.ResponseError(http.StatusBadRequest, err.Error())
-//	}
-//
-//	return util.Success(result)
-//}
+func (m *MattermostController) BotUserAction(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	//var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	// TODO Validate with personal token
+	//reqToken, err := util.GetStringKey(req.Headers, "Authorization")
+	//if err != nil {
+	//	return util.ServerError(err)
+	//}
+	//
+	//splitToken := strings.Split(strings.ToLower(reqToken), "bearer")
+	//if len(splitToken) != 2 {
+	//	return util.ClientError(http.StatusUnauthorized)
+	//}
+	fmt.Println(string(req.Body))
+
+	return util.Success(`{
+	  "update": {
+		"message": "Updated!"
+	  },
+	  "ephemeral_text": "You updated the post!"
+	}`)
+}
 
 func (m *MattermostController) GetQuestionDetails(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 

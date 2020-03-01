@@ -8,6 +8,7 @@ const (
 	QuestionMessage   MessageType = "QuestionMessage"
 	ErrorMessage      MessageType = "ErrorMessage"
 	AnswerMessage     MessageType = "AnswerMessage"
+	ReportMessage     MessageType = "ReportMessage"
 	StandupMessage    MessageType = "StandupMessage"
 	GreetingMessage   MessageType = "GreetingMessage"
 	OnBoardingMessage MessageType = "OnBoardingMessage"

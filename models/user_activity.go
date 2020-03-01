@@ -6,6 +6,7 @@ const (
 	UserQuestionActivity   UserActivityType = "UserQuestionActivity"
 	UserAnswerActivity     UserActivityType = "UserAnswerActivity"
 	UserReportActivity     UserActivityType = "UserReportActivity"
+	UserStandupActivity    UserActivityType = "UserStandupActivity"
 	UserGreetingActivity   UserActivityType = "UserGreetingActivity"
 	UserOnBoardingActivity UserActivityType = "UserOnBoardingActivity"
 )

@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"goscrum/server/constants"
 	"goscrum/server/models"
 	"net/http"
 
@@ -151,13 +152,53 @@ func (m *MattermostService) UserInteraction(userId string, message models.Messag
 		return &models.Message{
 			Content:       err.Error(),
 			UserId:        userId,
-			MessageType:   models.QuestionMessage,
+			MessageType:   models.ErrorMessage,
 			ParticipantID: participant.ID,
 		}, nil
 	}
 
 	if userActivity == nil {
-		// TODO -- ask user to start startup
+		var options []*model.PostActionOptions
+		for _, project := range participant.Projects {
+			options = append(options, &model.PostActionOptions{
+				Text:  project.Name,
+				Value: project.ID,
+			})
+		}
+		options = append(options, &model.PostActionOptions{
+			Text:  "Skip",
+			Value: "Skip",
+		})
+		message := fmt.Sprintf("Hello @%s :wave: Would you like to start GoScrum.io?",
+			participant.RealName,
+		)
+		attachment := model.SlackAttachment{
+			Color: "#00FFFF", // TODO later change the color
+			Text:  message,
+
+			Actions: []*model.PostAction{
+				&model.PostAction{
+					Type:       model.POST_ACTION_TYPE_BUTTON,
+					Name:       "Select an option...",
+					Disabled:   false,
+					DataSource: "",
+					//Options:       options,
+					DefaultOption: "Skip",
+					Integration: &model.PostActionIntegration{
+						URL: fmt.Sprintf("/plugins/%s/api/v1/user/action", constants.MattermostPluginId),
+						Context: map[string]interface{}{
+							"action": "action",
+						},
+					},
+				},
+			},
+		}
+		return &models.Message{
+			Attachments:   []*model.SlackAttachment{&attachment},
+			UserId:        participant.UserID,
+			MessageType:   models.StandupMessage,
+			ParticipantID: "",
+		}, nil
 	}
 
 	if userActivity.ActivityType == models.UserQuestionActivity {
@@ -235,11 +276,6 @@ func (m *MattermostService) UserInteraction(userId string, message models.Messag
 			}, nil
 		}
 
-		// sort questions by sequence
-		//sort.Slice(questions, func(i, j int) bool {
-		//	return questions[i].Sequence > questions[j].Sequence
-		//})
-
 		var answerIDs []string
 		for _, question := range questions {
 			for _, activity := range userActivities {
@@ -281,7 +317,7 @@ func (m *MattermostService) UserInteraction(userId string, message models.Messag
 			Content:       fmt.Sprintf("@%s updates", participant.RealName),
 			Attachments:   attachments,
 			UserId:        userId,
-			MessageType:   models.StandupMessage,
+			MessageType:   models.ReportMessage,
 			ParticipantID: participant.ID,
 			ChannelId:     project.ChannelID,
 		}, nil

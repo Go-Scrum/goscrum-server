@@ -168,6 +168,16 @@ functions:
           cors: true
 
       - http:
+          path: /mattermost/bot/user/{userId}/action
+          method: post
+          cors: true
+
+      - http:
+          path: /mattermost/bot/user/{userId}/action
+          method: get
+          cors: true
+
+      - http:
           path: /mattermost/bot/user/{userId}/message
           method: post
           cors: true
