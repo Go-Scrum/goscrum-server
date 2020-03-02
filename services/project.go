@@ -40,7 +40,9 @@ func (service *ProjectService) Save(project models.Project) (models.Project, err
 func (service *ProjectService) GetAll(workspaceId string) ([]models.Project, error) {
 	var projects []models.Project
 
-	if err := service.db.Where("workspace_id = ?", workspaceId).Find(&projects).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := service.db.
+		Preload("Participants").
+		Where("workspace_id = ?", workspaceId).Find(&projects).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return projects, err
 	}
 
