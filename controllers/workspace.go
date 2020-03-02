@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	"goscrum/server/models"
@@ -11,6 +10,7 @@ import (
 	"goscrum/server/util"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/davecgh/go-spew/spew"
 	jsoniter "github.com/json-iterator/go"
 	"golang.org/x/oauth2"
 )
@@ -26,16 +26,11 @@ func NewWorkspaceController(service services.WorkspaceService) WorkspaceControll
 func (a *WorkspaceController) Save(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	email := getEmailFromClaim(req)
-	if os.Getenv("LOCAL") == "true" {
-		email = "durgaprasad.budhwani@gmail.com"
-	}
-
 	if email == "" {
 		return util.ClientError(http.StatusUnauthorized)
 	}
 
 	workspace := models.Workspace{}
-	workspace.UserEmail = email
 	workspace.URL = strings.TrimSuffix(workspace.URL, "/")
 
 	err := json.Unmarshal([]byte(req.Body), &workspace)
@@ -43,6 +38,7 @@ func (a *WorkspaceController) Save(req events.APIGatewayProxyRequest) (events.AP
 		return util.ResponseError(http.StatusBadRequest, err.Error())
 	}
 
+	workspace.UserEmail = email
 	newWorkspace, err := a.service.Save(workspace)
 	if err != nil {
 		return util.ResponseError(http.StatusInternalServerError, err.Error())
@@ -64,11 +60,10 @@ func (a *WorkspaceController) Save(req events.APIGatewayProxyRequest) (events.AP
 }
 
 func getEmailFromClaim(req events.APIGatewayProxyRequest) string {
+	spew.Dump(req.RequestContext.Authorizer)
 	if claimPayload, ok := req.RequestContext.Authorizer["claims"]; ok {
 		claims := claimPayload.(map[string]interface{})
-		if claims != nil {
-			return fmt.Sprintf("%s", claims["email"])
-		}
+		return fmt.Sprintf("%s", claims["email"])
 	}
 	return ""
 }
@@ -76,10 +71,6 @@ func getEmailFromClaim(req events.APIGatewayProxyRequest) string {
 func (a *WorkspaceController) Get(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	email := getEmailFromClaim(req)
-	if os.Getenv("LOCAL") == "true" {
-		email = "durgaprasad.budhwani@gmail.com"
-	}
-
 	if email == "" {
 		return util.ClientError(http.StatusUnauthorized)
 	}

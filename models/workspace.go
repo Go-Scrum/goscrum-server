@@ -25,5 +25,5 @@ type Workspace struct {
 	Expiry        *time.Time    `json:"expiry"`
 	PersonalToken string        `json:"personal_token"`
 	Projects      []*Project    `json:"projects"`
-	UserEmail     string        `json:"user_email"`
+	UserEmail     string        `db:"user_email"  json:"user_email"`
 }
